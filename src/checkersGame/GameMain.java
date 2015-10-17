@@ -6,7 +6,7 @@ public class GameMain {
 	
 	//To run from terminal: java checkersGame.GameMain
 	public static void main(String[] args) {
-		System.out.println("Hello World!");
+		System.out.println("AvailableProcessors="+Runtime.getRuntime().availableProcessors());
 		b.printBoard();
 	}
 }

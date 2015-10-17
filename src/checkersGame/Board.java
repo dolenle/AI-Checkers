@@ -11,7 +11,7 @@ public class Board {
 	
 	public void printBoard() {
 		if (size%2 == 0) {
-			System.err.println("Zoom must be odd.");
+			System.err.println("Square size must be odd.");
 			System.exit(1);
 		}
 		for(int i=0; i<8*size; i++) {
