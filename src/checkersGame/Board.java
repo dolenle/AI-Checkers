@@ -2,20 +2,26 @@ package checkersGame;
 
 public class Board {
 	private int size;
+	private int cols;
+	private int thresh1;
+	private int thresh2;
 	private String bk = (char)27 + "[40m  " + (char)27 + "[0m";
 	private String wht = (char)27 + "[47m  " + (char)27 + "[0m";
 	
 	public Board(int squareSize) {
-		this.size = squareSize;
-	}
-	
-	public void printBoard() {
-		if (size%2 == 0) {
+		if (squareSize%2 == 0) {
 			System.err.println("Square size must be odd.");
 			System.exit(1);
 		}
-		for(int i=0; i<8*size; i++) {
-			if(i%size == size/2) {
+		this.size = squareSize;
+		cols = squareSize*8;
+		thresh1 = size/2;
+		thresh2 = size*2;
+	}
+	
+	public void printBoard() {
+		for(int i=0; i<cols; i++) {
+			if(i%size == thresh1) {
 				System.out.print(' ');
 				System.out.print(i/size);
 			} else {
@@ -23,14 +29,15 @@ public class Board {
 			}
 		}
 		System.out.println();
-		for(int j=0; j<8*size; j++) {
-			if(j%size == size/2) {
+		for(int j=0; j<cols; j++) {
+			if(j%size == thresh1) {
 				System.out.print(j/size);
 			} else {
 				System.out.print(' ');
 			}
-			for(int i=j/size*size; i<8*size+(j/size*size); i++) {
-				if(i%(2*size)>=size) {
+			int offset = j/size*size;
+			for(int i=offset; i<cols+offset; i++) {
+				if(i%thresh2>=size) {
 					System.out.print(wht);
 				} else {
 					System.out.print(bk);
