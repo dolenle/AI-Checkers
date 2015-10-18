@@ -4,36 +4,45 @@ import java.util.ArrayList;
 
 public class GameMain {
 	
-	static Board b = new Board(3);
+	static Board b = new Board(1);
 	
 	//To run from terminal: java checkersGame.GameMain
 	public static void main(String[] args) {
 		int threadCount =  Runtime.getRuntime().availableProcessors();
 		System.out.println("AvailableProcessors="+threadCount);
 		
-		//b.defaultStart();
-		b.addPiece(Piece.BLACK,4,4,true);
-		b.addPiece(Piece.RED,5,5);
-		b.addPiece(Piece.RED,3,3);
+		b.defaultStart();
 		b.printBoard();
 		
-		ArrayList<Move> rMoves = b.getValidMoves(Piece.BLACK, threadCount);
-		System.out.println("Black has "+rMoves.size()+" moves.");
-		for(Move m : rMoves) {
-			System.out.print("Piece at ("+m.getPiece().getX()+","+m.getPiece().getY()+")");
-			for(Step s : m.getSteps()) {
-				System.out.print("->("+s.getX()+","+s.getY()+")");
+		Player p1 = new DumbAI(Piece.BLACK);
+		Player p2 = new DumbAI(Piece.RED);
+		
+		ArrayList<Move> blackMoves, redMoves;
+		while(true) {
+			blackMoves = b.getValidMoves(Piece.BLACK, threadCount);
+			if(blackMoves.size() == 0) {
+				break;
 			}
-			System.out.println();
-		}
-		rMoves = b.getValidMoves(Piece.RED, threadCount);
-		System.out.println("Red has "+rMoves.size()+" moves.");
-		for(Move m : rMoves) {
-			System.out.print("Piece at ("+m.getPiece().getX()+","+m.getPiece().getY()+")");
-			for(Step s : m.getSteps()) {
-				System.out.print("->("+s.getX()+","+s.getY()+")");
+			b.applyMove(p1.selectMove(blackMoves, b));
+			b.printBoard();
+			
+			redMoves = b.getValidMoves(Piece.RED, threadCount);
+			if(redMoves.size() == 0) {
+				break;
 			}
-			System.out.println();
+			b.applyMove(p2.selectMove(redMoves, b));
+			b.printBoard();
 		}
+		
+		
+//		ArrayList<Move> rMoves = b.getValidMoves(Piece.RED, threadCount);
+//		System.out.println("Red has "+rMoves.size()+" moves.");
+//		for(Move m : rMoves) {
+//			System.out.print("Piece at ("+m.getPiece().getX()+","+m.getPiece().getY()+")");
+//			for(Step s : m.getSteps()) {
+//				System.out.print("->("+s.getX()+","+s.getY()+")");
+//			}
+//			System.out.println();
+//		}
 	}
 }

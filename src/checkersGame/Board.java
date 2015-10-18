@@ -19,7 +19,7 @@ public class Board {
 	private ArrayList<Piece> blackPieces = new ArrayList<Piece>();
 	
 	public Board(int squareSize) {
-		if (squareSize%2 == 0) {
+		if (squareSize%2 == 0 || squareSize < 0) {
 			System.err.println("Square size must be odd.");
 			System.exit(1);
 		}
@@ -145,5 +145,23 @@ public class Board {
 	
 	public Piece getPiece(int x, int y) {
 		return pieceLocs[y][x];
+	}
+	
+	public void applyMove(Move m) {
+		Piece p = m.getPiece();
+		for(Step s : m.getSteps()) {
+			pieceLocs[p.getY()][p.getX()] = null;
+			p.moveTo(s.getX(), s.getY());
+			pieceLocs[s.getY()][s.getX()] = p;
+			if(s.getCapture() != null) {
+				Piece c = s.getCapture();
+				pieceLocs[c.getY()][c.getX()] = null;
+				if(c.getTeam() == Piece.BLACK) {
+					blackPieces.remove(c);
+				} else {
+					redPieces.remove(c);
+				}
+			}
+		}
 	}
 }
