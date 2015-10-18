@@ -4,9 +4,12 @@ public class Piece {
 	private int team;
 	private int xLoc;
 	private int yLoc;
-	private boolean isKing = false;
+	private boolean king = false;
 	private String color;
 	private String text;
+	private int id;
+	
+	private static int nextID = 0;
 
 	public static final int RED = -1;
 	public static final int BLACK = 1;
@@ -19,9 +22,11 @@ public class Piece {
 		yLoc = yStart;
 		color = "\u001B[1m\u001B[31m"; //red
 		if(team>0) {
-			color = new String("\u001B[1m\u001B[34m"); //cyan
+			color = new String("\u001B[1m\u001B[32m"); //34 cyan, 32 green
 		}
 		this.text = new String(color+UTFLargeDot);
+		id = nextID++;
+		System.out.print(id);
 	}
 	
 	/**
@@ -32,9 +37,18 @@ public class Piece {
 		this.text = new String(color+customText);
 	}
 	
+	public void moveTo(int x, int y) {
+		xLoc = x;
+		yLoc = y;
+	}
+	
 	public void promote() {
-		isKing = true;
+		king = true;
 		text = "\u001B[7m"+text; //invert
+	}
+	
+	public boolean isKing() {
+		return king;
 	}
 	
 	public String getText() {
@@ -47,5 +61,21 @@ public class Piece {
 	
 	public int getY() {
 		return yLoc;
+	}
+	
+	public int getTeam() {
+		return team;
+	}
+	
+	public int getID() {
+		return id;
+	}
+	
+	public static int getNextID() {
+		return nextID;
+	}
+	
+	public static void resetID() {
+		nextID = 0;
 	}
 }

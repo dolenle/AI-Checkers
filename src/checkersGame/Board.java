@@ -1,6 +1,8 @@
 package checkersGame;
 
 import java.util.ArrayList;
+import java.util.ArrayDeque;
+import java.util.concurrent.*;
 
 public class Board {
 	private int size;
@@ -80,6 +82,53 @@ public class Board {
 	public void addPiece(int team, int x, int y) {
 		Piece p = new Piece(team, x, y);
 		pieceLocs[y][x] = p;
+		if(team == Piece.BLACK) {
+			blackPieces.add(p);
+		} else {
+			redPieces.add(p);
+		}
 		//p.promote();
+	}
+	
+	public ArrayList<Move> getValidMoves(int team, int threads) {
+		ArrayList<Piece> playerPieces;
+		if(team == Piece.BLACK) {
+			playerPieces = blackPieces;
+		} else {
+			playerPieces = redPieces; //careful; no error checking here!
+		}
+		ExecutorService deadPool = Executors.newFixedThreadPool(threads);
+		ArrayList<Move> validMoves = new ArrayList<Move>(8);
+		ArrayList<Future<ArrayDeque<Move>>> results = new ArrayList<Future<ArrayDeque<Move>>>();
+		for(Piece p : playerPieces) {
+			results.add(deadPool.submit(new MoveWorker(p, pieceLocs)));
+		}
+		for(Future<ArrayDeque<Move>> r : results) {
+			try {
+				validMoves.addAll(r.get());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		deadPool.shutdown();
+		return validMoves;
+	}
+	
+	public ArrayList<Move> getValidMovesSingleThread(int team) {
+		ArrayList<Piece> playerPieces;
+		if(team == Piece.BLACK) {
+			playerPieces = blackPieces;
+		} else {
+			playerPieces = redPieces; //careful; no error checking here!
+		}
+		ArrayList<Move> validMoves = new ArrayList<Move>(8);
+		for(Piece p : playerPieces) {
+			MoveWorker moveFinder = new MoveWorker(p, pieceLocs);
+			ArrayDeque<Move> result = moveFinder.call();
+			if(result != null) {
+				validMoves.addAll(result);
+			}
+		}
+		return validMoves;
 	}
 }
