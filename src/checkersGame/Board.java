@@ -130,4 +130,8 @@ public class Board {
 		}
 		return validMoves;
 	}
+	
+	public Piece getPiece(int x, int y) {
+		return pieceLocs[y][x];
+	}
 }

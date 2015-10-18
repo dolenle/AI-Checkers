@@ -11,8 +11,10 @@ public class GameMain {
 		int threadCount =  Runtime.getRuntime().availableProcessors();
 		System.out.println("AvailableProcessors="+threadCount);
 		
-		b.defaultStart();
+		//b.defaultStart();
 		b.addPiece(Piece.BLACK,4,4);
+		b.addPiece(Piece.BLACK,4,2);
+		b.addPiece(Piece.RED,5,5);
 		b.printBoard();
 		
 		ArrayList<Move> rMoves = b.getValidMoves(Piece.BLACK, threadCount);
