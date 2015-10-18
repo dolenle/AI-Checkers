@@ -12,8 +12,9 @@ public class Board {
 	private String end =  "\u001B[0m";
 	private String blank = "  ";
 	
-	private Piece[] pieceLocs = new Piece[32];
-	private ArrayList<Piece> pieceList = new ArrayList<Piece>();
+	private Piece[][] pieceLocs = new Piece[8][8];
+	private ArrayList<Piece> redPieces = new ArrayList<Piece>();
+	private ArrayList<Piece> blackPieces = new ArrayList<Piece>();
 	
 	public Board(int squareSize) {
 		if (squareSize%2 == 0) {
@@ -27,7 +28,6 @@ public class Board {
 	}
 	
 	public void printBoard() {
-		int counter = 0;
 		for(int i=0; i<cols; i++) {
 			if(i%size == thresh1) {
 				System.out.print(' ');
@@ -50,12 +50,11 @@ public class Board {
 				} else {
 					System.out.print(bk);
 					if(j%size == thresh1 && i%size == thresh1) {
-						if(pieceLocs[counter] == null) {
+						if(pieceLocs[j/size][(i-offset)/size] == null) {
 							System.out.print(blank+end);
 						} else {
-							System.out.print(pieceLocs[counter].text+end);
+							System.out.print(pieceLocs[j/size][(i-offset)/size].getText()+end);
 						}
-						counter++;
 					} else {
 						System.out.print(blank+end);
 					}
@@ -70,15 +69,17 @@ public class Board {
 	 * Set up the board with the normal starting positions
 	 */
 	public void defaultStart() {
-		for(int i=0; i<12; i++) {
-			addPiece(1, i);
-			addPiece(-1, 31-i);
+		for(int j=0; j<3; j++) {
+			for(int i=j%2; i<8; i+=2) {
+				addPiece(Piece.BLACK, i, j);
+				addPiece(Piece.RED, 7-i, 7-j);
+			}
 		}
 	}
 	
-	public void addPiece(int team, int location) {
-		Piece p = new Piece(team, location);
-		pieceLocs[location] = p;
+	public void addPiece(int team, int x, int y) {
+		Piece p = new Piece(team, x, y);
+		pieceLocs[y][x] = p;
 		//p.promote();
 	}
 }
