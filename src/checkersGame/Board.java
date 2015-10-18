@@ -111,15 +111,14 @@ public class Board {
 			}
 		}
 		deadPool.shutdown();
+		System.gc(); //try to clean up
 		return validMoves;
 	}
 	
 	public ArrayList<Move> getValidMovesSingleThread(int team) {
-		ArrayList<Piece> playerPieces;
+		ArrayList<Piece> playerPieces = redPieces;
 		if(team == Piece.BLACK) {
 			playerPieces = blackPieces;
-		} else {
-			playerPieces = redPieces; //careful; no error checking here!
 		}
 		ArrayList<Move> validMoves = new ArrayList<Move>(8);
 		for(Piece p : playerPieces) {

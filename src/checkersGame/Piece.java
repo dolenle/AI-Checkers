@@ -26,7 +26,6 @@ public class Piece {
 		}
 		this.text = new String(color+UTFLargeDot);
 		id = nextID++;
-		System.out.print(id);
 	}
 	
 	/**

@@ -1,9 +1,9 @@
 package checkersGame;
 
-import java.util.ArrayList;
+import java.util.ArrayDeque;
 
 public class Move {	
-	private ArrayList<Step> steps = new ArrayList<Step>(4);
+	private ArrayDeque<Step> steps;
 	private Piece p;
 	
 	/**
@@ -13,7 +13,13 @@ public class Move {
 	 */
 	public Move(Piece p, Step s) {
 		this.p = p;
+		steps = new ArrayDeque<Step>(1);
 		steps.add(s);
+	}
+	
+	public Move(Piece p, ArrayDeque<Step> s) {
+		this.p = p;
+		steps = new ArrayDeque<Step>(s);
 	}
 	
 	public void addStep(Step s) {
@@ -24,7 +30,7 @@ public class Move {
 		return p;
 	}
 	
-	public ArrayList<Step> getSteps() {
+	public ArrayDeque<Step> getSteps() {
 		return steps;
 	}
 }
