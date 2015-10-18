@@ -11,18 +11,34 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 	
 	private boolean[] jumped;
 	
+	/**
+	 * Creates a new MoveWorker to compute the valid moves for a give Piece
+	 * @param p The Piece to be moved
+	 * @param locs Location matrix for the Board
+	 */
 	public MoveWorker(Piece p, Piece[][] locs) {
-		this.moves = new ArrayDeque<Move>(4);
+		this.moves = new ArrayDeque<Move>();
 		this.p = p;
 		this.locs = locs;
 		jumped = new boolean[Piece.getNextID()];
 	}
 	
+	/**
+	 * Generates list of valid moves for the Piece
+	 */
 	public ArrayDeque<Move> call() {
 		ArrayDeque<Step> simpleMoves = getMoves(p.getX(), p.getY(), p.getTeam());
 		if(simpleMoves != null) {
 			for(Step s : simpleMoves) {
 				moves.add(new Move(p, s));
+			}
+		}
+		if(p.isKing()) {
+			simpleMoves = getMoves(p.getX(), p.getY(), -p.getTeam());
+			if(simpleMoves != null) {
+				for(Step s : simpleMoves) {
+					moves.add(new Move(p, s));
+				}
 			}
 		}
 		
@@ -38,7 +54,7 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 	private ArrayDeque<Step> getMoves(int x, int y, int dy) {
 		int destX;
 		int destY = y+dy;
-		ArrayDeque<Step> validMoves = new ArrayDeque<Step>(2);
+		ArrayDeque<Step> validMoves = new ArrayDeque<Step>();
 		
 		if(destY >= 0 && destY <= 7) {
 			for(int i=-1; i<=1; i+=2) {
@@ -57,7 +73,7 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 	
 	public ArrayDeque<ArrayDeque<Step>> getJumpTree(boolean[] history, int x, int y) {
 		ArrayDeque<Step> jumps = getJumps(history, x, y);
-		ArrayDeque<ArrayDeque<Step>> result = new ArrayDeque<ArrayDeque<Step>>(5);
+		ArrayDeque<ArrayDeque<Step>> result = new ArrayDeque<ArrayDeque<Step>>();
 		if(jumps != null) {
 			for(Step s: jumps) {
 				ArrayDeque<ArrayDeque<Step>> next = getJumpTree(history.clone(), s.getX(), s.getY());
@@ -79,7 +95,7 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 	private ArrayDeque<Step> getJumps(boolean[] history, int x, int y) {
 		int destX;
 		int destY = y+p.getTeam()*2;
-		ArrayDeque<Step> validJumps = new ArrayDeque<Step>(5);
+		ArrayDeque<Step> validJumps = new ArrayDeque<Step>();
 		
 		if(destY >= 0 && destY <= 7) {
 			for(int i=-2; i<=2; i+=4) { //please unroll this
@@ -89,6 +105,21 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 					if(locs[destY][destX] == null && canCapture(history, target)) {
 						validJumps.add(new Step(destX, destY, target));
 						history[target.getID()] = true;
+					}
+				}
+			}
+		}
+		if(p.isKing()) { //repeat for backwards jump
+			destY = y-p.getTeam()*2;
+			if(destY >= 0 && destY <= 7) {
+				for(int i=-2; i<=2; i+=4) { //please unroll this
+					destX = x+i;
+					if(destX >= 0 && destX <= 7) {
+						Piece target = locs[(destY+y)/2][(destX+x)/2];
+						if(locs[destY][destX] == null && canCapture(history, target)) {
+							validJumps.add(new Step(destX, destY, target));
+							history[target.getID()] = true;
+						}
 					}
 				}
 			}

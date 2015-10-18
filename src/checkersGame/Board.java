@@ -79,15 +79,27 @@ public class Board {
 		}
 	}
 	
-	public void addPiece(int team, int x, int y) {
-		Piece p = new Piece(team, x, y);
-		pieceLocs[y][x] = p;
-		if(team == Piece.BLACK) {
-			blackPieces.add(p);
+	public Piece addPiece(int team, int x, int y) {
+		if(pieceLocs[y][x] == null && (x+y%2)%2 == 0) {
+	 		Piece p = new Piece(team, x, y);
+			pieceLocs[y][x] = p;
+			if(team == Piece.BLACK) {
+				blackPieces.add(p);
+			} else {
+				redPieces.add(p);
+			}
+			return p;
 		} else {
-			redPieces.add(p);
+			System.out.println("Cannot add piece at ("+x+","+y+")");
+			return null;
 		}
-		//p.promote();
+	}
+	
+	public void addPiece(int team, int x, int y, boolean king) {
+		Piece p = addPiece(team,x,y);
+		if(king) {
+			p.promote();
+		}
 	}
 	
 	public ArrayList<Move> getValidMoves(int team, int threads) {

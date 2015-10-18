@@ -12,9 +12,9 @@ public class GameMain {
 		System.out.println("AvailableProcessors="+threadCount);
 		
 		//b.defaultStart();
-		b.addPiece(Piece.BLACK,4,4);
-		b.addPiece(Piece.BLACK,4,2);
+		b.addPiece(Piece.BLACK,4,4,true);
 		b.addPiece(Piece.RED,5,5);
+		b.addPiece(Piece.RED,3,3);
 		b.printBoard();
 		
 		ArrayList<Move> rMoves = b.getValidMoves(Piece.BLACK, threadCount);
