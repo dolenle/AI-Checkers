@@ -60,7 +60,6 @@ public class Board {
 					} else {
 						System.out.print(blank+end);
 					}
-					
 				}
 			}
 			System.out.println();
@@ -123,7 +122,6 @@ public class Board {
 			}
 		}
 		deadPool.shutdown();
-		System.gc(); //try to clean up
 		return validMoves;
 	}
 	
@@ -149,19 +147,37 @@ public class Board {
 	
 	public void applyMove(Move m) {
 		Piece p = m.getPiece();
-		for(Step s : m.getSteps()) {
-			pieceLocs[p.getY()][p.getX()] = null;
-			p.moveTo(s.getX(), s.getY());
-			pieceLocs[s.getY()][s.getX()] = p;
-			if(s.getCapture() != null) {
-				Piece c = s.getCapture();
-				pieceLocs[c.getY()][c.getX()] = null;
-				if(c.getTeam() == Piece.BLACK) {
-					blackPieces.remove(c);
-				} else {
-					redPieces.remove(c);
-				}
-			}
+		Step s = m.getSteps().peekLast();
+		pieceLocs[p.getY()][p.getX()] = null;
+		p.moveTo(s.getX(), s.getY());
+		pieceLocs[s.getY()][s.getX()] = p;
+		ArrayList<Piece> opponent = blackPieces;
+		if(p.getTeam() == Piece.BLACK) {
+			opponent = redPieces;
 		}
+		for(Piece cp : m.getCaptures()) {
+			pieceLocs[cp.getY()][cp.getX()] = null;
+			opponent.remove(cp);
+		}
+		if(m.isPromotion()) {
+			p.promote();
+		}
+//		for(Step s : m.getSteps()) {
+//			pieceLocs[p.getY()][p.getX()] = null;
+//			p.moveTo(s.getX(), s.getY());
+//			pieceLocs[s.getY()][s.getX()] = p;
+//			if(s.getCapture() != null) {
+//				Piece c = s.getCapture();
+//				pieceLocs[c.getY()][c.getX()] = null;
+//				if(c.getTeam() == Piece.BLACK) {
+//					blackPieces.remove(c);
+//				} else {
+//					redPieces.remove(c);
+//				}
+//			}
+//		}
+//		if(m.isPromotion()) {
+//			p.promote();
+//		}
 	}
 }

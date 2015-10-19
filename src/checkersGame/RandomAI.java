@@ -3,11 +3,11 @@ package checkersGame;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class DumbAI implements Player {
+public class RandomAI implements Player {
 	int team;
 	Random rand = new Random();
 	
-	public DumbAI(int team) {
+	public RandomAI(int team) {
 		this.team = team;
 	}
 	

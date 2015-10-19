@@ -46,6 +46,9 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 		if(jumpTree != null) {
 			for(ArrayDeque<Step> s : jumpTree) {
 				moves.add(new Move(p, s));
+				if(s.peekLast().getY() == 3.5+p.getTeam()*3.5 && !p.isKing()) {
+					moves.peekLast().setPromotion();
+				}
 			}
 		}
 		return moves;
