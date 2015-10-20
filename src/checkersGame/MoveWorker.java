@@ -27,27 +27,27 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 	 * Generates list of valid moves for the Piece
 	 */
 	public ArrayDeque<Move> call() {
-		ArrayDeque<Step> simpleMoves = getMoves(p.getX(), p.getY(), p.getTeam());
-		if(simpleMoves != null) {
-			for(Step s : simpleMoves) {
-				moves.add(new Move(p, s));
-			}
-		}
-		if(p.isKing()) {
-			simpleMoves = getMoves(p.getX(), p.getY(), -p.getTeam());
-			if(simpleMoves != null) {
-				for(Step s : simpleMoves) {
-					moves.add(new Move(p, s));
-				}
-			}
-		}
-		
 		ArrayDeque<ArrayDeque<Step>> jumpTree = getJumpTree(jumped, p.getX(), p.getY());
 		if(jumpTree != null) {
 			for(ArrayDeque<Step> s : jumpTree) {
 				moves.add(new Move(p, s));
 				if(s.peekLast().getY() == 3.5+p.getTeam()*3.5 && !p.isKing()) {
 					moves.peekLast().setPromotion();
+				}
+			}
+		} else {
+			ArrayDeque<Step> simpleMoves = getMoves(p.getX(), p.getY(), p.getTeam());
+			if(simpleMoves != null) {
+				for(Step s : simpleMoves) {
+					moves.add(new Move(p, s));
+				}
+			}
+			if(p.isKing()) {
+				simpleMoves = getMoves(p.getX(), p.getY(), -p.getTeam());
+				if(simpleMoves != null) {
+					for(Step s : simpleMoves) {
+						moves.add(new Move(p, s));
+					}
 				}
 			}
 		}

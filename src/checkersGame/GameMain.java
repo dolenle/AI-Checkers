@@ -13,8 +13,8 @@ public class GameMain {
 		b.defaultStart();
 		b.printBoard();
 		
-		Player p1 = new ConstantAI(Piece.BLACK);
-		Player p2 = new RandomAI(Piece.RED);
+		Player p1 = new HumanPlayer(Piece.BLACK);
+		Player p2 = new HumanPlayer(Piece.RED);
 		
 		ArrayList<Move> blackMoves, redMoves;
 		
