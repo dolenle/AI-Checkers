@@ -14,7 +14,7 @@ public class RandomAI implements Player {
 	//Random move
 	public Move selectMove(ArrayList<Move> validMoves, Board b) {
 		Move m = validMoves.get(rand.nextInt(validMoves.size()));
-		System.out.print("DumbAI plays ("+m.getPiece().getX()+","+m.getPiece().getY()+")");
+		System.out.print("RandomAI plays ("+m.getPiece().getX()+","+m.getPiece().getY()+")");
 		for(Step s : m.getSteps()) {
 			System.out.print("->("+s.getX()+","+s.getY()+")");
 		}

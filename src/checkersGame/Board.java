@@ -14,7 +14,7 @@ public class Board {
 	private String end =  "\u001B[0m";
 	private String blank = "  ";
 	
-	private Piece[][] pieceLocs = new Piece[8][8];
+	private Piece[] pieceLocs = new Piece[64];
 	private ArrayList<Piece> redPieces = new ArrayList<Piece>();
 	private ArrayList<Piece> blackPieces = new ArrayList<Piece>();
 	
@@ -52,10 +52,10 @@ public class Board {
 				} else {
 					System.out.print(bk);
 					if(j%size == thresh1 && i%size == thresh1) {
-						if(pieceLocs[j/size][(i-offset)/size] == null) {
+						if(pieceLocs[j/size*8+(i-offset)/size] == null) {
 							System.out.print(blank+end);
 						} else {
-							System.out.print(pieceLocs[j/size][(i-offset)/size].getText()+end);
+							System.out.print(pieceLocs[j/size*8+(i-offset)/size].getText()+end);
 						}
 					} else {
 						System.out.print(blank+end);
@@ -79,9 +79,9 @@ public class Board {
 	}
 	
 	public Piece addPiece(int team, int x, int y) {
-		if(pieceLocs[y][x] == null && (x+y%2)%2 == 0) {
+		if(pieceLocs[y*8 + x] == null && (x+y%2)%2 == 0) {
 	 		Piece p = new Piece(team, x, y);
-			pieceLocs[y][x] = p;
+			pieceLocs[y*8 + x] = p;
 			if(team == Piece.BLACK) {
 				blackPieces.add(p);
 			} else {
@@ -142,42 +142,41 @@ public class Board {
 	}
 	
 	public Piece getPiece(int x, int y) {
-		return pieceLocs[y][x];
+		return pieceLocs[y*8 + x];
 	}
 	
 	public void applyMove(Move m) {
 		Piece p = m.getPiece();
 		Step s = m.getSteps().peekLast();
-		pieceLocs[p.getY()][p.getX()] = null;
+		pieceLocs[p.getY()*8 + p.getX()] = null;
 		p.moveTo(s.getX(), s.getY());
-		pieceLocs[s.getY()][s.getX()] = p;
+		pieceLocs[s.getY()*8 + s.getX()] = p;
 		ArrayList<Piece> opponent = blackPieces;
 		if(p.getTeam() == Piece.BLACK) {
 			opponent = redPieces;
 		}
 		for(Piece cp : m.getCaptures()) {
-			pieceLocs[cp.getY()][cp.getX()] = null;
+			pieceLocs[cp.getY()*8 + cp.getX()] = null;
 			opponent.remove(cp);
 		}
 		if(m.isPromotion()) {
 			p.promote();
 		}
-//		for(Step s : m.getSteps()) {
-//			pieceLocs[p.getY()][p.getX()] = null;
-//			p.moveTo(s.getX(), s.getY());
-//			pieceLocs[s.getY()][s.getX()] = p;
-//			if(s.getCapture() != null) {
-//				Piece c = s.getCapture();
-//				pieceLocs[c.getY()][c.getX()] = null;
-//				if(c.getTeam() == Piece.BLACK) {
-//					blackPieces.remove(c);
-//				} else {
-//					redPieces.remove(c);
-//				}
-//			}
-//		}
-//		if(m.isPromotion()) {
-//			p.promote();
-//		}
+	}
+	
+	private void setLocs(Piece[] locs) {
+		pieceLocs = locs;
+	}
+	
+	private void setPieces(ArrayList<Piece> black, ArrayList<Piece> red) {
+		blackPieces = black;
+		redPieces = red;
+	}
+	
+	public Board clone() {
+		Board b = this.clone();
+		b.setLocs(pieceLocs.clone());
+		b.setPieces(blackPieces, redPieces);
+		return b;
 	}
 }

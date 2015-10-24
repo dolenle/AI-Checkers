@@ -7,7 +7,7 @@ import java.util.concurrent.Callable;
 public class MoveWorker implements Callable<ArrayDeque<Move>> {
 	private ArrayDeque<Move> moves;
 	private Piece p;
-	private Piece[][] locs;
+	private Piece[] locs;
 	
 	private boolean[] jumped;
 	
@@ -16,7 +16,7 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 	 * @param p The Piece to be moved
 	 * @param locs Location matrix for the Board
 	 */
-	public MoveWorker(Piece p, Piece[][] locs) {
+	public MoveWorker(Piece p, Piece[] locs) {
 		this.moves = new ArrayDeque<Move>();
 		this.p = p;
 		this.locs = locs;
@@ -62,7 +62,7 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 		if(destY >= 0 && destY <= 7) {
 			for(int i=-1; i<=1; i+=2) {
 				destX = x+i;
-				if(destX >= 0 && destX <= 7 && locs[destY][destX] == null) {
+				if(destX >= 0 && destX <= 7 && locs[destY*8 + destX] == null) {
 					validMoves.add(new Step(destX, destY));
 				}
 			}
@@ -104,8 +104,8 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 			for(int i=-2; i<=2; i+=4) { //please unroll this
 				destX = x+i;
 				if(destX >= 0 && destX <= 7) {
-					Piece target = locs[(destY+y)/2][(destX+x)/2];
-					if(locs[destY][destX] == null && canCapture(history, target)) {
+					Piece target = locs[(destY+y)/2*8 + (destX+x)/2];
+					if(locs[destY*8 + destX] == null && canCapture(history, target)) {
 						validJumps.add(new Step(destX, destY, target));
 						history[target.getID()] = true;
 					}
@@ -118,8 +118,8 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 				for(int i=-2; i<=2; i+=4) { //please unroll this
 					destX = x+i;
 					if(destX >= 0 && destX <= 7) {
-						Piece target = locs[(destY+y)/2][(destX+x)/2];
-						if(locs[destY][destX] == null && canCapture(history, target)) {
+						Piece target = locs[(destY+y)/2*8 + (destX+x)/2];
+						if(locs[destY*8 + destX] == null && canCapture(history, target)) {
 							validJumps.add(new Step(destX, destY, target));
 							history[target.getID()] = true;
 						}
