@@ -18,6 +18,8 @@ public class Board {
 	private ArrayList<Piece> redPieces = new ArrayList<Piece>();
 	private ArrayList<Piece> blackPieces = new ArrayList<Piece>();
 	
+	private int kingCount[] = {0, 0, 0};
+	
 	public Board(int squareSize) {
 		if (squareSize%2 == 0 || squareSize < 0) {
 			System.err.println("Square size must be odd.");
@@ -145,23 +147,30 @@ public class Board {
 		return pieceLocs[y*8 + x];
 	}
 	
-	public void applyMove(Move m) {
+	public Board applyMove(Move m) {
 		Piece p = m.getPiece();
+		int team = p.getTeam();
 		Step s = m.getSteps().peekLast();
 		pieceLocs[p.getY()*8 + p.getX()] = null;
 		p.moveTo(s.getX(), s.getY());
 		pieceLocs[s.getY()*8 + s.getX()] = p;
+		
 		ArrayList<Piece> opponent = blackPieces;
-		if(p.getTeam() == Piece.BLACK) {
+		if(team == Piece.BLACK) {
 			opponent = redPieces;
 		}
 		for(Piece cp : m.getCaptures()) {
 			pieceLocs[cp.getY()*8 + cp.getX()] = null;
 			opponent.remove(cp);
+			if(cp.isKing()) {
+				kingCount[-team+1]--;
+			}
 		}
 		if(m.isPromotion()) {
 			p.promote();
+			kingCount[team+1]++;
 		}
+		return this;
 	}
 	
 	private void setLocs(Piece[] locs) {
@@ -178,5 +187,17 @@ public class Board {
 		b.setLocs(pieceLocs.clone());
 		b.setPieces(blackPieces, redPieces);
 		return b;
+	}
+	
+	public ArrayList<Piece> getBlackPieces() {
+		return blackPieces;
+	}
+	
+	public ArrayList<Piece> getRedPieces() {
+		return redPieces;
+	}
+	
+	public int getKingCount(int team) {
+		return kingCount[team+1];
 	}
 }

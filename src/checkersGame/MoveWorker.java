@@ -27,6 +27,7 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 	 * Generates list of valid moves for the Piece
 	 */
 	public ArrayDeque<Move> call() {
+		locs[p.getY()*8 + p.getX()] = null;
 		ArrayDeque<ArrayDeque<Step>> jumpTree = getJumpTree(jumped, p.getX(), p.getY());
 		if(jumpTree != null) {
 			for(ArrayDeque<Step> s : jumpTree) {
@@ -51,6 +52,7 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 				}
 			}
 		}
+		locs[p.getY()*8 + p.getX()] = p; //put it back
 		return moves;
 	}
 	
@@ -79,7 +81,9 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 		ArrayDeque<ArrayDeque<Step>> result = new ArrayDeque<ArrayDeque<Step>>();
 		if(jumps != null) {
 			for(Step s: jumps) {
-				ArrayDeque<ArrayDeque<Step>> next = getJumpTree(history.clone(), s.getX(), s.getY());
+				boolean historyCopy[] = history.clone();
+				historyCopy[s.getCapture().getID()] = true;
+				ArrayDeque<ArrayDeque<Step>> next = getJumpTree(historyCopy, s.getX(), s.getY());
 				if(next != null) {
 					for(ArrayDeque<Step> branch : next) {
 						branch.push(s);
@@ -99,7 +103,8 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 		int destX;
 		int destY = y+p.getTeam()*2;
 		ArrayDeque<Step> validJumps = new ArrayDeque<Step>();
-		
+		boolean[] history2 = null;
+
 		if(destY >= 0 && destY <= 7) {
 			for(int i=-2; i<=2; i+=4) { //please unroll this
 				destX = x+i;
@@ -107,7 +112,6 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 					Piece target = locs[(destY+y)/2*8 + (destX+x)/2];
 					if(locs[destY*8 + destX] == null && canCapture(history, target)) {
 						validJumps.add(new Step(destX, destY, target));
-						history[target.getID()] = true;
 					}
 				}
 			}
@@ -121,7 +125,6 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 						Piece target = locs[(destY+y)/2*8 + (destX+x)/2];
 						if(locs[destY*8 + destX] == null && canCapture(history, target)) {
 							validJumps.add(new Step(destX, destY, target));
-							history[target.getID()] = true;
 						}
 					}
 				}
