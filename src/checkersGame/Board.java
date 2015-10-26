@@ -182,10 +182,11 @@ public class Board {
 		redPieces = red;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Board clone() {
-		Board b = this.clone();
+		Board b = new Board(size);
 		b.setLocs(pieceLocs.clone());
-		b.setPieces(blackPieces, redPieces);
+		b.setPieces((ArrayList<Piece>) blackPieces.clone(), (ArrayList<Piece>) redPieces.clone());
 		return b;
 	}
 	
