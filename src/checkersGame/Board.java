@@ -182,11 +182,20 @@ public class Board {
 		redPieces = red;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Board clone() {
+	public Board clone() { //what a terrible terrible thing
 		Board b = new Board(size);
-		b.setLocs(pieceLocs.clone());
-		b.setPieces((ArrayList<Piece>) blackPieces.clone(), (ArrayList<Piece>) redPieces.clone());
+		b.setLocs(new Piece[64]);
+		ArrayList<Piece> blackCopy = new ArrayList<Piece>(blackPieces.size());
+		ArrayList<Piece> redCopy = new ArrayList<Piece>(redPieces.size());
+		for(Piece bPiece : blackPieces) {
+			blackCopy.add(new Piece(bPiece));
+			b.pieceLocs[bPiece.getY()*8 + bPiece.getX()] = bPiece;
+		}
+		for(Piece rPiece : redPieces) {
+			redCopy.add(new Piece(rPiece));
+			b.pieceLocs[rPiece.getY()*8 + rPiece.getX()] = rPiece;
+		}
+		b.setPieces(blackCopy, redCopy);
 		return b;
 	}
 	

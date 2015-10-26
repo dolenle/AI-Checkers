@@ -1,6 +1,6 @@
 package checkersGame;
 
-public class Piece {
+public class Piece implements Cloneable{
 	private int team;
 	private int xLoc;
 	private int yLoc;
@@ -26,6 +26,14 @@ public class Piece {
 		}
 		this.text = new String(color+UTFLargeDot);
 		id = nextID++;
+	}
+	
+	public Piece(Piece original) {
+		team = original.getTeam();
+		xLoc = original.getX();
+		yLoc = original.getY();
+		king = original.isKing();
+		id = original.getID();
 	}
 	
 	/**

@@ -5,14 +5,11 @@ import java.util.Scanner;
 
 public class OkayAI implements Player {
 	private long timeLimit;
-	private int team;
+	private int playerTeam;
 	private Scanner input = new Scanner(System.in);
-	
-	private int alpha = Integer.MIN_VALUE;
-	private int beta = Integer.MAX_VALUE;
 		
 	public OkayAI(int team) {
-		this.team = team;
+		playerTeam = team;
 		int seconds = 0;
 		do {
 			System.out.print("Please enter a time limit in seconds: ");
@@ -32,7 +29,7 @@ public class OkayAI implements Player {
 		while(System.nanoTime() - start < timeLimit) {
 			int best = Integer.MIN_VALUE;
 			for(Move m : validMoves) {
-				int score = search(depth, m, b.clone(), team);
+				int score = search(depth, m, b.clone(), playerTeam);
 				if(score > best) {
 					best = score;
 					bestMove = m;
@@ -53,16 +50,33 @@ public class OkayAI implements Player {
 		if(depth == 0) {
 			return evaluate(m, b.applyMove(m), team);
 		}
-		b.applyMove(m);
-		ArrayList<Move> branches = b.getValidMovesSingleThread(-team);
-		int value = Integer.MIN_VALUE;
-		for(Move next : branches) {
-			int score = -search(depth-1, next, b.clone(), -team);
-			if(score > value) {
-				value = score;
-			}
+		System.out.print("Examining move ("+m.getPiece().getX()+","+m.getPiece().getY()+")");
+		for(Step s : m.getSteps()) {
+			System.out.print("->("+s.getX()+","+s.getY()+")");
 		}
-		return value;
+		System.out.println();
+		b.applyMove(m);
+		b.printBoard();
+//		ArrayList<Move> branches = b.getValidMovesSingleThread(-team);
+//		
+//		System.out.println((team==playerTeam?"player":"opponent")+" has "+branches.size()+" moves:");		
+//		for(Move c : branches) {
+//			System.out.print("Piece at ("+c.getPiece().getX()+","+c.getPiece().getY()+")");
+//			for(Step s : c.getSteps()) {
+//				System.out.print("->("+s.getX()+","+s.getY()+")");
+//			}
+//			System.out.println();
+//		}
+//		
+//		int value = Integer.MIN_VALUE;
+//		for(Move next : branches) {
+//			int score = -search(depth-1, next, b.clone(), -team);
+//			if(score > value) {
+//				value = score;
+//			}
+//		}
+//		return value;
+		return 0;
 	}
 	
 	//heuristic
@@ -80,6 +94,6 @@ public class OkayAI implements Player {
 	}
 	
 	public int getTeam() {
-		return team;
+		return playerTeam;
 	}
 }
