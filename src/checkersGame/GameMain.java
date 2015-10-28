@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class GameMain {
 	
-	static Board b = new Board(3);
+	static Board b = new Board(1);
 	
 	//To run from terminal: java checkersGame.GameMain
 	public static void main(String[] args) {
@@ -14,7 +14,7 @@ public class GameMain {
 		b.defaultStart();
 		
 		Player p1 = new OkayAI(Piece.BLACK);
-		Player p2 = new HumanPlayer(Piece.RED);
+		Player p2 = new RandomAI(Piece.RED);
 		
 		ArrayList<Move> blackMoves, redMoves;
 		

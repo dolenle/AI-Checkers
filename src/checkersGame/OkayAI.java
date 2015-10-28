@@ -20,19 +20,21 @@ public class OkayAI implements Player {
 			} catch (Exception e) {
 				input.next();
 			}
-		} while(seconds < 3 || seconds > 30);
+		} while(seconds < 0 || seconds > 30);
 		timeLimit = ((long) seconds)*1000000000;
 	}
 	
 	public Move selectMove(ArrayList<Move> validMoves, Board b) {
-		int depth = 1;
+		int depth = 3;
 		Move bestMove = validMoves.get(0);
+		Move nextBest = bestMove;
 		if(validMoves.size() == 1) {
 			return bestMove;
 		}
 		long start = System.nanoTime();
-		while(System.nanoTime() - start < timeLimit) {
+//		while(System.nanoTime() - start < timeLimit) {
 			int best = 0;
+			bestMove = nextBest;
 			for(Move m : validMoves) {
 				int score = search(depth, m, b, playerTeam);
 				if(score > best || score == best && rand.nextBoolean()) {
@@ -40,8 +42,8 @@ public class OkayAI implements Player {
 					bestMove = m;
 				}
 			}
-			depth++;
-		}
+//			depth++;
+//		}
 		System.out.println("Reached depth "+depth);
 		return bestMove;
 	}

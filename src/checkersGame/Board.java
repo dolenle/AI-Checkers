@@ -12,6 +12,10 @@ public class Board {
 	private String bk = "\u001B[40m";
 	private String wht = "\u001B[47m  " + "\u001B[0m";
 	private String end =  "\u001B[0m";
+	
+	private String[] colors = {"\u001B[1m\u001B[31m", null, "\u001B[1m\u001B[32m"}; //34 cyan, 32 green
+	private static final String UTFLargeDot = "\u2B24 ";
+	
 	private String blank = "  ";
 	
 	private Piece[] pieceLocs = new Piece[64];
@@ -52,10 +56,14 @@ public class Board {
 				if(i%thresh2>=size) {
 					System.out.print(bk);
 					if(j%size == thresh1 && i%size == thresh1) {
-						if(pieceLocs[j/size*8+(i-offset)/size] == null) {
+						Piece p = pieceLocs[j/size*8+(i-offset)/size];
+						if(p == null) {
 							System.out.print(blank+end);
 						} else {
-							System.out.print(pieceLocs[j/size*8+(i-offset)/size].getText()+end);
+							if(p.isKing()) {
+								System.out.print("\u001B[7m");
+							}
+							System.out.print(colors[p.getTeam()+1]+UTFLargeDot+end);
 						}
 					} else {
 						System.out.print(blank+end);
