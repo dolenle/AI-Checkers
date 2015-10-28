@@ -50,8 +50,6 @@ public class Board {
 			int offset = j/size*size;
 			for(int i=offset; i<cols+offset; i++) {
 				if(i%thresh2>=size) {
-					System.out.print(wht);
-				} else {
 					System.out.print(bk);
 					if(j%size == thresh1 && i%size == thresh1) {
 						if(pieceLocs[j/size*8+(i-offset)/size] == null) {
@@ -62,6 +60,8 @@ public class Board {
 					} else {
 						System.out.print(blank+end);
 					}
+				} else {
+					System.out.print(wht);
 				}
 			}
 			System.out.println();
@@ -73,7 +73,7 @@ public class Board {
 	 */
 	public void defaultStart() {
 		for(int j=0; j<3; j++) {
-			for(int i=j%2; i<8; i+=2) {
+			for(int i=(j+1)%2; i<8; i+=2) {
 				addPiece(Piece.BLACK, i, j);
 				addPiece(Piece.RED, 7-i, 7-j);
 			}
@@ -81,7 +81,7 @@ public class Board {
 	}
 	
 	public Piece addPiece(int team, int x, int y) {
-		if(pieceLocs[y*8 + x] == null && (x+y%2)%2 == 0) {
+		if(pieceLocs[y*8 + x] == null && (x+y%2)%2 == 1) {
 	 		Piece p = new Piece(team, x, y);
 			pieceLocs[y*8 + x] = p;
 			if(team == Piece.BLACK) {
@@ -168,9 +168,11 @@ public class Board {
 		p.moveTo(s.getX(), s.getY());
 		pieceLocs[s.getY()*8 + s.getX()] = p;
 		
-		ArrayList<Piece> opponent = blackPieces;
+		ArrayList<Piece> opponent;
 		if(team == Piece.BLACK) {
 			opponent = redPieces;
+		} else {
+			opponent = blackPieces;
 		}
 		for(Piece cp : m.getCaptures()) {
 			pieceLocs[cp.getY()*8 + cp.getX()] = null;
@@ -189,9 +191,11 @@ public class Board {
 	public Board undoMove(Move m) {
 		Piece p = m.getPiece();
 		int team = p.getTeam();
-		ArrayList<Piece> opponent = blackPieces;
+		ArrayList<Piece> opponent;
 		if(team == Piece.BLACK) {
 			opponent = redPieces;
+		} else {
+			opponent = blackPieces;
 		}
 		for(Piece cp : m.getCaptures()) {
 			pieceLocs[cp.getY()*8 + cp.getX()] = cp;
