@@ -24,8 +24,11 @@ public class OkayAI implements Player {
 	
 	public Move selectMove(ArrayList<Move> validMoves, Board b) {
 		long start = System.nanoTime();
-		int depth = 7;
+		int depth = 1;
 		Move bestMove = validMoves.get(0);
+		if(validMoves.size() == 1) {
+			return bestMove;
+		}
 		//while(System.nanoTime() - start < timeLimit) {
 			int best = 0;
 			for(Move m : validMoves) {
@@ -56,10 +59,19 @@ public class OkayAI implements Player {
 		b.applyMove(m);
 		ArrayList<Move> branches = b.getValidMovesSingleThread(-team);
 		
-		int value = 0;
+		if(branches.size() == 0) {
+			return Integer.MAX_VALUE;
+		}
+				
+		int value = (Integer.MIN_VALUE+1)*team*playerTeam;
+//		if(team == playerTeam) {
+//			value = Integer.MIN_VALUE;
+//		} else {
+//			value = Integer.MAX_VALUE;
+//		}
 		for(Move next : branches) {
 			int score = search(depth-1, next, b, -team);
-			if(score>value) {
+			if(score*team > value*playerTeam) {
 				value = score;
 			}
 		}
@@ -70,33 +82,25 @@ public class OkayAI implements Player {
 	//heuristic
 	public int evaluate(Move m, Board b, int team) {
 		int redScore, blackScore, score;
-		redScore = 3*(b.getRedPieces().size()-b.getKingCount(Piece.RED));
-		redScore += 5*b.getKingCount(Piece.RED);
-		blackScore = 3*(b.getBlackPieces().size()-b.getKingCount(Piece.BLACK));
-		blackScore += 5*b.getKingCount(Piece.BLACK);
+		redScore = 4*(b.getRedPieces().size());
+		redScore += 2*b.getKingCount(Piece.RED);
+		blackScore = 4*(b.getBlackPieces().size());
+		blackScore += 2*b.getKingCount(Piece.BLACK);
 		
-		if(team == Piece.RED) {
+		if(playerTeam == Piece.RED) {
 			if(blackScore == 0) {
 				return Integer.MAX_VALUE;
 			}
-			score = (redScore*1000)/blackScore;
+			score = (redScore*1024)/blackScore;
 		} else {
 			if(redScore == 0) {
 				return Integer.MAX_VALUE;
 			}
-			score = (blackScore*1000)/redScore;
+			score = (blackScore*1024)/redScore;
 		}
-		
-		
-//		if(team == Piece.RED) {
-//			score = 8*b.getRedPieces().size();
-//			score -= 8*b.getBlackPieces().size();
-//		} else {
-//			score = 8*b.getBlackPieces().size();
-//			score -= 8*b.getRedPieces().size();
-//		}
-//		score += 8*b.getKingCount(team);
-//		score += 8*m.getCaptures().size();
+		if(m.isPromotion()) {
+			score += 1000;
+		}
 		return score;
 	}
 	

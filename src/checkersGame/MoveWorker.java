@@ -103,7 +103,6 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 		int destX;
 		int destY = y+p.getTeam()*2;
 		ArrayDeque<Step> validJumps = new ArrayDeque<Step>();
-		boolean[] history2 = null;
 
 		if(destY >= 0 && destY <= 7) {
 			for(int i=-2; i<=2; i+=4) { //please unroll this
