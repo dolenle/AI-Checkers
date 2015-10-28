@@ -133,12 +133,25 @@ public class Board {
 			playerPieces = blackPieces;
 		}
 		ArrayList<Move> validMoves = new ArrayList<Move>(8);
+		ArrayList<Move> nonCaptures = new ArrayList<Move>(8);
+		boolean capture = false;
 		for(Piece p : playerPieces) {
 			MoveWorker moveFinder = new MoveWorker(p, pieceLocs);
 			ArrayDeque<Move> result = moveFinder.call();
 			if(result != null) {
-				validMoves.addAll(result);
+				for(Move m : result) {
+					if(m.getCaptures().size() > 0) {
+						capture = true;
+						validMoves.add(m);
+					} else if(!capture) {
+						validMoves.add(m);
+						nonCaptures.add(m);
+					}
+				}
 			}
+		}
+		if(capture) {
+			validMoves.removeAll(nonCaptures);
 		}
 		return validMoves;
 	}
@@ -173,6 +186,30 @@ public class Board {
 		return this;
 	}
 	
+	public Board undoMove(Move m) {
+		Piece p = m.getPiece();
+		int team = p.getTeam();
+		ArrayList<Piece> opponent = blackPieces;
+		if(team == Piece.BLACK) {
+			opponent = redPieces;
+		}
+		for(Piece cp : m.getCaptures()) {
+			pieceLocs[cp.getY()*8 + cp.getX()] = cp;
+			opponent.add(cp);
+			if(cp.isKing()) {
+				kingCount[-team+1]++;
+			}
+		}
+		pieceLocs[p.getY()*8 + p.getX()] = null;
+		p.moveTo(m.getStartX(), m.getStartY());
+		pieceLocs[p.getY()*8 + p.getX()] = p;
+		if(m.isPromotion()) {
+			p.demote();
+			kingCount[team+1]--;
+		}
+		return this;
+	}
+	
 	private void setLocs(Piece[] locs) {
 		pieceLocs = locs;
 	}
@@ -188,12 +225,14 @@ public class Board {
 		ArrayList<Piece> blackCopy = new ArrayList<Piece>(blackPieces.size());
 		ArrayList<Piece> redCopy = new ArrayList<Piece>(redPieces.size());
 		for(Piece bPiece : blackPieces) {
-			blackCopy.add(new Piece(bPiece));
-			b.pieceLocs[bPiece.getY()*8 + bPiece.getX()] = bPiece;
+			Piece newB = new Piece(bPiece);
+			blackCopy.add(newB);
+			b.pieceLocs[bPiece.getY()*8 + bPiece.getX()] = newB;
 		}
 		for(Piece rPiece : redPieces) {
-			redCopy.add(new Piece(rPiece));
-			b.pieceLocs[rPiece.getY()*8 + rPiece.getX()] = rPiece;
+			Piece newR = new Piece(rPiece);
+			redCopy.add(newR);
+			b.pieceLocs[rPiece.getY()*8 + rPiece.getX()] = newR;
 		}
 		b.setPieces(blackCopy, redCopy);
 		return b;
@@ -209,5 +248,9 @@ public class Board {
 	
 	public int getKingCount(int team) {
 		return kingCount[team+1];
+	}
+	
+	public Piece[] getPieceLocations() {
+		return pieceLocs;
 	}
 }

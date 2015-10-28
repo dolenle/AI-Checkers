@@ -8,6 +8,8 @@ public class Move {
 	private Piece p;
 	private boolean promotion = false;
 	private ArrayList<Piece> captures = new ArrayList<Piece>();
+	private int startX;
+	private int startY;
 	
 	/**
 	 * Constructor for a Move, which consists of one or more Steps for a given Piece.
@@ -24,6 +26,8 @@ public class Move {
 				break;
 			}
 		}
+		startX = p.getX();
+		startY = p.getY();
 	}
 	
 	/**
@@ -61,5 +65,13 @@ public class Move {
 	
 	public ArrayList<Piece> getCaptures() {
 		return captures;
+	}
+	
+	public int getStartX() {
+		return startX;
+	}
+	
+	public int getStartY() {
+		return startY;
 	}
 }

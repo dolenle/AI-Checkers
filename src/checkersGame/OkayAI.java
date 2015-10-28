@@ -24,12 +24,12 @@ public class OkayAI implements Player {
 	
 	public Move selectMove(ArrayList<Move> validMoves, Board b) {
 		long start = System.nanoTime();
-		int depth = 0;
+		int depth = 1;
 		Move bestMove = validMoves.get(0);
 		while(System.nanoTime() - start < timeLimit) {
 			int best = Integer.MIN_VALUE;
 			for(Move m : validMoves) {
-				int score = search(depth, m, b.clone(), playerTeam);
+				int score = search(depth, m, b, playerTeam);
 				if(score > best) {
 					best = score;
 					bestMove = m;
@@ -48,48 +48,49 @@ public class OkayAI implements Player {
 	
 	private int search(int depth, Move m, Board b, int team) {
 		if(depth == 0) {
-			return evaluate(m, b.applyMove(m), team);
+			int score = evaluate(m, b.applyMove(m), team);
+			b.undoMove(m);
+			return score;
 		}
-		System.out.print("Examining move ("+m.getPiece().getX()+","+m.getPiece().getY()+")");
-		for(Step s : m.getSteps()) {
-			System.out.print("->("+s.getX()+","+s.getY()+")");
-		}
-		System.out.println();
+
 		b.applyMove(m);
-		b.printBoard();
-//		ArrayList<Move> branches = b.getValidMovesSingleThread(-team);
-//		
-//		System.out.println((team==playerTeam?"player":"opponent")+" has "+branches.size()+" moves:");		
-//		for(Move c : branches) {
-//			System.out.print("Piece at ("+c.getPiece().getX()+","+c.getPiece().getY()+")");
-//			for(Step s : c.getSteps()) {
-//				System.out.print("->("+s.getX()+","+s.getY()+")");
-//			}
-//			System.out.println();
-//		}
-//		
-//		int value = Integer.MIN_VALUE;
-//		for(Move next : branches) {
-//			int score = -search(depth-1, next, b.clone(), -team);
-//			if(score > value) {
-//				value = score;
-//			}
-//		}
-//		return value;
-		return 0;
+		ArrayList<Move> branches = b.getValidMovesSingleThread(-team);
+		
+		int value = Integer.MIN_VALUE;
+		for(Move next : branches) {
+			int score = search(depth-1, next, b, -team);
+			if(score>value) {
+				value = score;
+			}
+		}
+		b.undoMove(m);
+		return value;
 	}
 	
 	//heuristic
 	private int evaluate(Move m, Board b, int team) {
-		int score = 10;
+		int redScore, blackScore, score;
+		redScore = 3*(b.getRedPieces().size()-b.getKingCount(Piece.RED));
+		redScore += 5*b.getKingCount(Piece.RED);
+		blackScore = 3*(b.getBlackPieces().size()-b.getKingCount(Piece.BLACK));
+		blackScore += 5*b.getKingCount(Piece.BLACK);
+		
 		if(team == Piece.RED) {
-			score += b.getRedPieces().size();
+			score = (redScore*1000)/blackScore;
 		} else {
-			score += b.getBlackPieces().size();
+			score = (blackScore*1000)/redScore;
 		}
-		score += b.getKingCount(team);
-		score += m.getCaptures().size();
-		score -= b.getKingCount(-team);
+		
+		
+//		if(team == Piece.RED) {
+//			score = 8*b.getRedPieces().size();
+//			score -= 8*b.getBlackPieces().size();
+//		} else {
+//			score = 8*b.getBlackPieces().size();
+//			score -= 8*b.getRedPieces().size();
+//		}
+//		score += 8*b.getKingCount(team);
+//		score += 8*m.getCaptures().size();
 		return score;
 	}
 	

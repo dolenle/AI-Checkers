@@ -34,6 +34,7 @@ public class Piece implements Cloneable{
 		yLoc = original.getY();
 		king = original.isKing();
 		id = original.getID();
+		text = original.getText();
 	}
 	
 	/**
@@ -52,6 +53,11 @@ public class Piece implements Cloneable{
 	public void promote() {
 		king = true;
 		text = "\u001B[7m"+text; //invert
+	}
+	
+	public void demote() {
+		king = false;
+		text = new String(color+UTFLargeDot);
 	}
 	
 	public boolean isKing() {
