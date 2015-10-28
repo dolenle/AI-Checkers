@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class GameMain {
 	
-	static Board b = new Board(3);
+	static Board b = new Board(1);
 	
 	//To run from terminal: java checkersGame.GameMain
 	public static void main(String[] args) {
@@ -23,8 +23,8 @@ public class GameMain {
 //		b.addPiece(Piece.RED,6,6);
 //		b.addPiece(Piece.RED,2,6);
 		
-		Player p1 = new HumanPlayer(Piece.BLACK);
-		Player p2 = new HumanPlayer(Piece.RED);
+		Player p1 = new OkayAI(Piece.BLACK);
+		Player p2 = new RandomAI(Piece.RED);
 		
 		ArrayList<Move> blackMoves, redMoves;
 		
@@ -35,14 +35,19 @@ public class GameMain {
 				System.out.println("Player 1 out of moves");
 				break;
 			}
-			b.applyMove(p1.selectMove(blackMoves, b));
+			Move m = p1.selectMove(blackMoves, b);
+			b.applyMove(m);
 			b.printBoard();
+			//System.out.println("Player 1 Heuristic: "+p1.evaluate(m, b, p1.getTeam()));
+			
 			redMoves = b.getValidMovesSingleThread(Piece.RED);
 			if(redMoves.size() == 0) {
 				System.out.println("Player 2 out of moves");
 				break;
 			}
-			b.applyMove(p2.selectMove(redMoves, b));
+			m = p2.selectMove(redMoves, b);
+			b.applyMove(m);
+			//System.out.println("Player 2 Heuristic: "+p1.evaluate(m, b, p2.getTeam()));
 		}
 		b.printBoard();
 	}

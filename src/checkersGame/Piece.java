@@ -37,14 +37,6 @@ public class Piece implements Cloneable{
 		text = original.getText();
 	}
 	
-	/**
-	 * Create a Piece with a custom character
-	 */
-	public Piece(int team, int xStart, int yStart, String customText) {
-		this(team, xStart, yStart);
-		this.text = new String(color+customText);
-	}
-	
 	public void moveTo(int x, int y) {
 		xLoc = x;
 		yLoc = y;

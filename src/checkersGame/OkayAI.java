@@ -24,10 +24,10 @@ public class OkayAI implements Player {
 	
 	public Move selectMove(ArrayList<Move> validMoves, Board b) {
 		long start = System.nanoTime();
-		int depth = 1;
+		int depth = 7;
 		Move bestMove = validMoves.get(0);
-		while(System.nanoTime() - start < timeLimit) {
-			int best = Integer.MIN_VALUE;
+		//while(System.nanoTime() - start < timeLimit) {
+			int best = 0;
 			for(Move m : validMoves) {
 				int score = search(depth, m, b, playerTeam);
 				if(score > best) {
@@ -35,8 +35,8 @@ public class OkayAI implements Player {
 					bestMove = m;
 				}
 			}
-			depth++;
-		}
+			//depth++;
+		//}
 		System.out.println("Reached depth "+depth);
 		System.out.print("TestAI plays ("+bestMove.getPiece().getX()+","+bestMove.getPiece().getY()+")");
 		for(Step s : bestMove.getSteps()) {
@@ -56,7 +56,7 @@ public class OkayAI implements Player {
 		b.applyMove(m);
 		ArrayList<Move> branches = b.getValidMovesSingleThread(-team);
 		
-		int value = Integer.MIN_VALUE;
+		int value = 0;
 		for(Move next : branches) {
 			int score = search(depth-1, next, b, -team);
 			if(score>value) {
@@ -68,7 +68,7 @@ public class OkayAI implements Player {
 	}
 	
 	//heuristic
-	private int evaluate(Move m, Board b, int team) {
+	public int evaluate(Move m, Board b, int team) {
 		int redScore, blackScore, score;
 		redScore = 3*(b.getRedPieces().size()-b.getKingCount(Piece.RED));
 		redScore += 5*b.getKingCount(Piece.RED);
@@ -76,8 +76,14 @@ public class OkayAI implements Player {
 		blackScore += 5*b.getKingCount(Piece.BLACK);
 		
 		if(team == Piece.RED) {
+			if(blackScore == 0) {
+				return Integer.MAX_VALUE;
+			}
 			score = (redScore*1000)/blackScore;
 		} else {
+			if(redScore == 0) {
+				return Integer.MAX_VALUE;
+			}
 			score = (blackScore*1000)/redScore;
 		}
 		

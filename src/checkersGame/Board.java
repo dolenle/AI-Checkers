@@ -253,4 +253,62 @@ public class Board {
 	public Piece[] getPieceLocations() {
 		return pieceLocs;
 	}
+	
+	public boolean isConsistent() {
+		boolean status = true;
+		int blackKings = 0;
+		int redKings = 0;
+		int blackPieceCount = 0;
+		int redPieceCount = 0;
+		for(int i=0; i<pieceLocs.length; i++) {
+			Piece p = pieceLocs[i];
+			if(p != null) {
+				int team = p.getTeam();
+				if(team == Piece.BLACK) {
+					blackPieceCount++;
+					if(p.isKing()) {
+						blackKings++;
+					}
+					if(!blackPieces.contains(p)) {
+						System.out.println("Black Piece not in list");
+						status = false;
+					}
+				} else if(team == Piece.RED) {
+					redPieceCount++;
+					if(p.isKing()) {
+						redKings++;
+					}
+					if(!redPieces.contains(p)) {
+						System.out.println("Red Piece not in list");
+						status = false;
+					}
+				}
+				if(p.getY()*8+p.getX() != i) {
+					System.out.println("Piece location mismatch");
+					status = false;
+				}
+			}
+		}
+		if(blackKings != getKingCount(Piece.BLACK)) {
+			System.out.println("Black King Count Mismatch - counted "+blackKings+", recorded "+getKingCount(Piece.BLACK));
+			status = false;
+		}
+		if(redKings != getKingCount(Piece.RED)) {
+			System.out.println("Red King Count Mismatch - counted "+redKings+", recorded "+getKingCount(Piece.RED));
+			status = false;
+		}
+		if(blackPieceCount != blackPieces.size()) {
+			System.out.println("Black Piece Count Mismatch - counted "+blackPieceCount+", recorded "+blackPieces.size());
+			status = false;
+		}
+		if(redPieceCount != redPieces.size()) {
+			System.out.println("Red Piece Count Mismatch - counted "+redPieceCount+", recorded "+redPieces.size());
+			status = false;
+		}
+		if(!status) {
+			System.out.println("Inconsistent Board State:");
+			printBoard();
+		}
+		return status;
+	}
 }
