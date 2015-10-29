@@ -13,7 +13,7 @@ import checkersGame.Player;
 
 /**
  * A feeble attempt at making a multithreaded version of OkayAI
- *
+ * At least it works well as a CPU warmer
  */
 
 public class MultiThreadAI implements Player {

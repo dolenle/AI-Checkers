@@ -8,6 +8,7 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 	private ArrayDeque<Move> moves;
 	private Piece p;
 	private Piece[] locs;
+	private boolean jumpsOnly = false;
 	
 	private boolean[] jumped;
 	
@@ -16,10 +17,11 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 	 * @param p The Piece to be moved
 	 * @param locs Location matrix for the Board
 	 */
-	public MoveWorker(Piece p, Piece[] locs) {
+	public MoveWorker(Piece p, Piece[] locs, boolean jumpsOnly) {
 		this.moves = new ArrayDeque<Move>();
 		this.p = p;
 		this.locs = locs;
+		this.jumpsOnly = jumpsOnly;
 		jumped = new boolean[Piece.getNextID()];
 	}
 	
@@ -36,7 +38,7 @@ public class MoveWorker implements Callable<ArrayDeque<Move>> {
 					moves.peekLast().setPromotion();
 				}
 			}
-		} else {
+		} else if(!jumpsOnly) {
 			ArrayDeque<Step> simpleMoves = getMoves(p.getX(), p.getY(), p.getTeam());
 			if(simpleMoves != null) {
 				for(Step s : simpleMoves) {

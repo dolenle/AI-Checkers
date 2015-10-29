@@ -12,11 +12,11 @@ public class GameMain {
 	//To run from terminal: java checkersGame.GameMain
 	public static void main(String[] args) {
 		
-		//loadBoard("test.txt", b);
+		//loadBoard("moveTest.txt", b);
 		b.defaultStart();
 		
 		Player p1 = new OkayAI(Piece.BLACK);
-		Player p2 = new MultiThreadAI(Piece.RED);
+		Player p2 = new AlphabetAI(Piece.RED);
 		
 		ArrayList<Move> blackMoves, redMoves;
 		

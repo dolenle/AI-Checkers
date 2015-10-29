@@ -76,6 +76,27 @@ public class Board {
 		}
 	}
 	
+	public Board clone() { //what a terrible terrible thing
+		Board b = new Board(size);
+		Piece[] newLocs = new Piece[64];
+		b.setLocs(newLocs);
+		ArrayList<Piece> blackCopy = new ArrayList<Piece>(blackPieces.size());
+		ArrayList<Piece> redCopy = new ArrayList<Piece>(redPieces.size());
+		for(Piece bPiece : blackPieces) {
+			Piece newB = new Piece(bPiece);
+			blackCopy.add(newB);
+			newLocs[bPiece.getY()*8 + bPiece.getX()] = newB;
+		}
+		for(Piece rPiece : redPieces) {
+			Piece newR = new Piece(rPiece);
+			redCopy.add(newR);
+			newLocs[rPiece.getY()*8 + rPiece.getX()] = newR;
+		}
+		b.setPieces(blackCopy, redCopy);
+		b.kingCount = kingCount.clone();
+		return b;
+	}
+	
 	/**
 	 * Set up the board with the normal starting positions
 	 */
@@ -108,9 +129,12 @@ public class Board {
 		Piece p = addPiece(team,x,y);
 		if(king) {
 			p.promote();
+			kingCount[team+1]++;
 		}
 	}
 	
+	
+	//HAS BUG. DO NOT USE. DEPRECATED?
 	public ArrayList<Move> getValidMoves(int team, int threads) {
 		ArrayList<Piece> playerPieces;
 		if(team == Piece.BLACK) {
@@ -119,10 +143,10 @@ public class Board {
 			playerPieces = redPieces; //careful; no error checking here!
 		}
 		ExecutorService deadPool = Executors.newFixedThreadPool(threads);
-		ArrayList<Move> validMoves = new ArrayList<Move>(8);
+		ArrayList<Move> validMoves = new ArrayList<Move>();
 		ArrayList<Future<ArrayDeque<Move>>> results = new ArrayList<Future<ArrayDeque<Move>>>();
 		for(Piece p : playerPieces) {
-			results.add(deadPool.submit(new MoveWorker(p, pieceLocs)));
+			results.add(deadPool.submit(new MoveWorker(p, pieceLocs, false)));
 		}
 		for(Future<ArrayDeque<Move>> r : results) {
 			try {
@@ -140,32 +164,28 @@ public class Board {
 		if(team == Piece.BLACK) {
 			playerPieces = blackPieces;
 		}
-		ArrayList<Move> validMoves = new ArrayList<Move>(8);
-		ArrayList<Move> nonCaptures = new ArrayList<Move>(8);
+		ArrayList<Move> allMoves = new ArrayList<Move>();
+		ArrayList<Move> jumpMoves = new ArrayList<Move>();
 		boolean capture = false;
 		for(Piece p : playerPieces) {
-			MoveWorker moveFinder = new MoveWorker(p, pieceLocs);
+			MoveWorker moveFinder = new MoveWorker(p, pieceLocs, capture);
 			ArrayDeque<Move> result = moveFinder.call();
 			if(result != null) {
 				for(Move m : result) {
 					if(m.getCaptures().size() > 0) {
 						capture = true;
-						validMoves.add(m);
+						jumpMoves.add(m);
 					} else if(!capture) {
-						validMoves.add(m);
-						nonCaptures.add(m);
+						allMoves.add(m);
 					}
 				}
 			}
 		}
 		if(capture) {
-			validMoves.removeAll(nonCaptures);
+			return jumpMoves;
+		} else {
+			return allMoves;
 		}
-		return validMoves;
-	}
-	
-	public Piece getPiece(int x, int y) {
-		return pieceLocs[y*8 + x];
 	}
 	
 	public Board applyMove(Move m) {
@@ -222,36 +242,9 @@ public class Board {
 		return this;
 	}
 	
-	private void setLocs(Piece[] locs) {
-		pieceLocs = locs;
-	}
-	
-	private void setPieces(ArrayList<Piece> black, ArrayList<Piece> red) {
-		blackPieces = black;
-		redPieces = red;
-	}
-	
-	public Board clone() { //what a terrible terrible thing
-		Board b = new Board(size);
-		Piece[] newLocs = new Piece[64];
-		b.setLocs(newLocs);
-		ArrayList<Piece> blackCopy = new ArrayList<Piece>(blackPieces.size());
-		ArrayList<Piece> redCopy = new ArrayList<Piece>(redPieces.size());
-		for(Piece bPiece : blackPieces) {
-			Piece newB = new Piece(bPiece);
-			blackCopy.add(newB);
-			newLocs[bPiece.getY()*8 + bPiece.getX()] = newB;
-		}
-		for(Piece rPiece : redPieces) {
-			Piece newR = new Piece(rPiece);
-			redCopy.add(newR);
-			newLocs[rPiece.getY()*8 + rPiece.getX()] = newR;
-		}
-		b.setPieces(blackCopy, redCopy);
-		b.kingCount = kingCount.clone();
-		return b;
-	}
-	
+	/**
+	 * Apply a move regardless of the Board object it was derived from
+	 */
 	public ArrayList<Piece> applyAnonymousMove(Move m) {
 		ArrayList<Piece> captures = new ArrayList<Piece>();
 		Piece p = pieceLocs[m.getPiece().getY()*8 + m.getPiece().getX()];
@@ -308,6 +301,19 @@ public class Board {
 			kingCount[team+1]--;
 		}
 		return this;
+	}
+	
+	public Piece getPiece(int x, int y) {
+		return pieceLocs[y*8 + x];
+	}
+	
+	private void setLocs(Piece[] locs) {
+		pieceLocs = locs;
+	}
+	
+	private void setPieces(ArrayList<Piece> black, ArrayList<Piece> red) {
+		blackPieces = black;
+		redPieces = red;
 	}
 	
 	public ArrayList<Piece> getBlackPieces() {
