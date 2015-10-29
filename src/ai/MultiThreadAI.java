@@ -36,6 +36,11 @@ public class MultiThreadAI implements Player {
 		timeLimit = ((long) seconds)*1000000000;
 	}
 	
+	public MultiThreadAI(int team, int time) {
+		playerTeam = team;
+		timeLimit = ((long) time)*1000000000;
+	}
+	
 	public Move selectMove(ArrayList<Move> validMoves, Board b) {
 		if(validMoves.size() == 1) {
 			return validMoves.get(0);

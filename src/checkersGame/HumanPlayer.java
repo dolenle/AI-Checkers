@@ -1,5 +1,6 @@
 package checkersGame;
 
+import java.util.Random;
 import java.util.Scanner;
 import java.util.ArrayList;
 
@@ -36,21 +37,13 @@ public class HumanPlayer implements Player {
 		}
 		int sel = -1;
 		do {
-			System.out.println("Please enter an integer from 1 to "+(counter-1)+", or 'h' to ask the AI for help.");
+			System.out.println("Please enter an integer from 1 to "+(counter-1)+", or 'h' to ask an AI for help.");
 			try {
 				sel = input.nextInt();
 			} catch (Exception e) {
 				try {
 					if(input.nextLine().charAt(0) == 'h') {
-						System.out.println("Asking AI for help...");
-						OkayAI2 ai = new OkayAI2(team, 5);
-						System.out.println("AI is thinking...");
-						Move help = ai.selectMove(validMoves, b);
-						System.out.print("AI says, \"Weeeellll.... If it were up to me, I would choose ("+help.getPiece().getX()+","+help.getPiece().getY()+")");
-						for(Step s : help.getSteps()) {
-							System.out.print("->("+s.getX()+","+s.getY()+")");
-						}
-						System.out.println(" (option "+(validMoves.indexOf(help)+1)+")\"");
+						getHelp(validMoves, b);
 						continue;
 					}
 				} catch (Exception e2) {
@@ -65,5 +58,50 @@ public class HumanPlayer implements Player {
 	
 	public int getTeam() {
 		return team;
+	}
+	
+	private void getHelp(ArrayList<Move> validMoves, Board b) {
+		System.out.println("Asking an AI for help...");
+		Random rand = new Random();
+		int x = rand.nextInt(4);
+		String aiName=null, thinkText=null, resultText=null, prologue=null;
+		Player ai = null;
+		switch(x) {
+		case 0:
+			aiName = "RandomAI";
+			thinkText = "Huh? You need help?... Um.... sure, I guess.";
+			resultText = "No idea if this will work or not, but I'll go with";
+			prologue = ", but what do I know?";
+			ai = new RandomAI(team);
+			break;
+		case 1:
+			aiName = "ConstantAI";
+			thinkText = "Ugh, what do you want?";
+			resultText = "Look, it doesn't matter anyway, it's just a stupid game. Just choose";
+			prologue = ". It'll work, trust me.";
+			ai = new ConstantAI(team);
+			break;
+		case 2:
+			aiName = "OkayAI";
+			thinkText = "Okay, I'll have a look at the board.";
+			resultText = "Okay, if it were up to me, I would choose";
+			prologue = ". Does that sound okay to you?";
+			ai = new OkayAI(team, 3);
+			break;
+		case 3:
+			aiName = "MultiThreadAI";
+			thinkText = "I'll have my team of highly trained monkeys work on your question ASAP.";
+			resultText = "My team of monkeys has reached a conclusion. You should play";
+			prologue = ". Good luck.";
+			ai = new MultiThreadAI(team, 3);
+			break;
+		}
+		System.out.println(aiName+" says: \""+thinkText+"\"");
+		Move help = ai.selectMove(validMoves, b);
+		System.out.print(aiName+" says: \""+resultText+" ("+help.getPiece().getX()+","+help.getPiece().getY()+")");
+		for(Step s : help.getSteps()) {
+			System.out.print("->("+s.getX()+","+s.getY()+")");
+		}
+		System.out.println(" (option "+(validMoves.indexOf(help)+1)+")"+prologue+"\"");
 	}
 }

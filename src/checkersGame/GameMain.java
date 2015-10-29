@@ -15,8 +15,8 @@ public class GameMain {
 		//loadBoard("moveTest.txt", b);
 		b.defaultStart();
 		
-		Player p1 = new OkayAI(Piece.BLACK);
-		Player p2 = new AlphabetAI(Piece.RED);
+		Player p1 = new HumanPlayer(Piece.BLACK);
+		Player p2 = new OkayAI(Piece.RED);
 		
 		ArrayList<Move> blackMoves, redMoves;
 		
