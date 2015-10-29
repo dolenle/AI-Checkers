@@ -1,9 +1,9 @@
 package ai;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.concurrent.TimeoutException;
 
 import checkersGame.Board;
 import checkersGame.Move;
@@ -15,6 +15,8 @@ public class OkayAI implements Player {
 	private int playerTeam;
 	private Scanner input = new Scanner(System.in);
 	private Random rand = new Random();
+	
+	private long stopTime;
 				
 	public OkayAI(int team) {
 		playerTeam = team;
@@ -36,41 +38,43 @@ public class OkayAI implements Player {
 	}
 	
 	public Move selectMove(ArrayList<Move> validMoves, Board b) {
-		int depth = 3;
+		int depth = 1;
 		Move bestMove = validMoves.get(0);
 		Move lastBest = bestMove;
+		int best = Integer.MIN_VALUE;
 		if(validMoves.size() == 1) {
 			return bestMove;
 		}
-		long start = System.nanoTime();
-		long lastTime = 0;
-		long now = start;
+		long startTime = System.nanoTime();
+		stopTime = startTime+timeLimit;
 		
-		int i = 0;
-		while(now - start < timeLimit) {
-			lastTime = now - start;
-			int best = Integer.MIN_VALUE;
+		while(best != Integer.MAX_VALUE) {
+			best = Integer.MIN_VALUE;
 			lastBest = bestMove;
+			long lastTime = System.nanoTime();
 			for(Move m : validMoves) {
+				try {
 				int score = search(depth, m, b, playerTeam);
 				if(score > best || score == best && rand.nextBoolean()) {
 					best = score;
 					bestMove = m;
 				}
+				} catch(TimeoutException te) {
+					System.out.println("Search time limit reached. Reverting to depth "+--depth);
+					System.out.println("Reached depth "+depth+" in "+(lastTime - startTime)/1000000000.0+"s");
+					return lastBest;
+				}
 			}
-			now = System.nanoTime();
 			depth++;
 		}
-		if(now - start > timeLimit) {
-			System.out.println("Time limit exceeded! Reverting to depth "+--depth);
-			bestMove = lastBest;
-		}
-		System.out.println("Reached depth "+depth+" in "+(lastTime)/1000000000.0+"s");
-			
+		System.out.println("Reached depth "+(depth-1)+" in "+(System.nanoTime() - startTime)/1000000000.0+"s");
 		return bestMove;
 	}
 	
-	private int search(int depth, Move m, Board b, int team) {
+	private int search(int depth, Move m, Board b, int team) throws TimeoutException {
+		if(System.nanoTime() > stopTime) {
+			throw new TimeoutException();
+		}
 		if(depth == 0) {
 			int score = evaluate(m, b.applyMove(m));
 			//b.printBoard();
@@ -91,9 +95,14 @@ public class OkayAI implements Player {
 			}
 			
 			for(Move next : branches) {
-				int score = search(depth-1, next, b, -team);
-				if(score > value) {
-					value = score;
+				try {
+					int score = search(depth-1, next, b, -team);
+					if(score > value) {
+						value = score;
+					}
+				} catch (TimeoutException te) {
+					b.undoMove(m);
+					throw te;
 				}
 			}
 		} else {
@@ -103,9 +112,14 @@ public class OkayAI implements Player {
 				return Integer.MIN_VALUE;
 			}
 			for(Move next : branches) {
-				int score = search(depth-1, next, b, -team);
-				if(score < value) {
-					value = score;
+				try {
+					int score = search(depth-1, next, b, -team);
+					if(score < value) {
+						value = score;
+					}
+				} catch (TimeoutException te) {
+					b.undoMove(m);
+					throw te;
 				}
 			}
 		}
@@ -146,4 +160,5 @@ public class OkayAI implements Player {
 	public int getTeam() {
 		return playerTeam;
 	}
+	
 }

@@ -9,14 +9,14 @@ public class GameMain {
 	
 	static Board b = new Board(1);
 	
-	//To run from terminal: java checkersGame.GameMain
+	//Run from terminal: java checkersGame.GameMain
 	public static void main(String[] args) {
 		
 		//loadBoard("moveTest.txt", b);
 		b.defaultStart();
 		
-		Player p1 = new OkayAI2(Piece.BLACK);
-		Player p2 = new AlphabetAI(Piece.RED);
+		Player p1 = new OkayAI(Piece.BLACK);
+		Player p2 = new OkayAI(Piece.RED);
 		
 		ArrayList<Move> blackMoves, redMoves;
 		

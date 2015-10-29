@@ -1,6 +1,5 @@
 package ai;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
@@ -46,7 +45,6 @@ public class OkayAI2 implements Player {
 		long lastTime = 0;
 		long now = start;
 		
-		int i = 0;
 		while(now - start < timeLimit) {
 			lastTime = now - start;
 			lastBest = bestMove;
@@ -81,46 +79,6 @@ public class OkayAI2 implements Player {
 		return bestMove;
 	}
 	
-	private int search(int depth, Move m, Board b, int team) {
-		if(depth == 0) {
-			int score = evaluate(m, b.applyMove(m));
-			b.undoMove(m);
-			return score;
-		}
-
-		b.applyMove(m);
-		ArrayList<Move> branches = b.getValidMovesSingleThread(-team);
-				
-		int value;// = (Integer.MIN_VALUE+1)*team*playerTeam;
-		if(team == Piece.RED) {
-			value = Integer.MIN_VALUE;
-			if(branches.size() == 0) {
-				b.undoMove(m);
-				return Integer.MAX_VALUE;
-			}
-			
-			for(Move next : branches) {
-				int score = search(depth-1, next, b, -team);
-				if(score > value) {
-					value = score;
-				}
-			}
-		} else {
-			value = Integer.MAX_VALUE;
-			if(branches.size() == 0) {
-				b.undoMove(m);
-				return Integer.MIN_VALUE;
-			}
-			for(Move next : branches) {
-				int score = search(depth-1, next, b, -team);
-				if(score < value) {
-					value = score;
-				}
-			}
-		}
-		b.undoMove(m);
-		return value;
-	}
 	
 	private int max(int depth, Move m, Board b) {
 		if(depth == 0) {
