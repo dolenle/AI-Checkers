@@ -1,5 +1,6 @@
 package ai;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
@@ -9,13 +10,13 @@ import checkersGame.Move;
 import checkersGame.Piece;
 import checkersGame.Player;
 
-public class AlphabetAI implements Player {
+public class OkayAI2 implements Player {
 	private long timeLimit;
 	private int playerTeam;
 	private Scanner input = new Scanner(System.in);
 	private Random rand = new Random();
 				
-	public AlphabetAI(int team) {
+	public OkayAI2(int team) {
 		playerTeam = team;
 		int seconds = 0;
 		do {
@@ -29,13 +30,13 @@ public class AlphabetAI implements Player {
 		timeLimit = ((long) seconds)*1000000000;
 	}
 	
-	public AlphabetAI(int team, int time) {
+	public OkayAI2(int team, int time) {
 		playerTeam = team;
 		timeLimit = ((long) time)*1000000000;
 	}
 	
 	public Move selectMove(ArrayList<Move> validMoves, Board b) {
-		int depth = 7;
+		int depth = 3;
 		Move bestMove = validMoves.get(0);
 		Move lastBest = bestMove;
 		if(validMoves.size() == 1) {
@@ -44,36 +45,30 @@ public class AlphabetAI implements Player {
 		long start = System.nanoTime();
 		long lastTime = 0;
 		long now = start;
+		
+		int i = 0;
 		while(now - start < timeLimit) {
 			lastTime = now - start;
-			int best = Integer.MIN_VALUE;
 			lastBest = bestMove;
-			int alpha = Integer.MIN_VALUE;
-			int beta = Integer.MAX_VALUE;
-			for(Move m : validMoves) {
-				int score = search(depth, m, b, playerTeam, alpha, beta);
-				if(score > best || score == best && rand.nextBoolean()) {
-					alpha = best = score;
-					bestMove = m;
+			if(playerTeam == Piece.RED) {
+				int best = Integer.MIN_VALUE;
+				for(Move m : validMoves) {
+					int score = max(depth, m, b);
+					if(score > best || score == best && rand.nextBoolean()) {
+						best = score;
+						bestMove = m;
+					}
 				}
-				if(beta < best) {
-					break;
+			} else {
+				int best = Integer.MAX_VALUE;
+				for(Move m : validMoves) {
+					int score = min(depth, m, b);
+					if(score < best || score == best && rand.nextBoolean()) {
+						best = score;
+						bestMove = m;
+					}
 				}
 			}
-//			int best2 = best;
-//			best = Integer.MIN_VALUE;
-//			for(Move m : validMoves) {
-//				int score = regularSearch(depth, m, b, playerTeam);
-//				if(score > best || score == best && rand.nextBoolean()) {
-//					best = score;
-//					bestMove = m;
-//				}
-//			}
-//			if(best2 != best) {
-//				System.out.println("AlphaBeta score mismatch!");
-//				System.exit(1);
-//			}
-			
 			now = System.nanoTime();
 			depth++;
 		}
@@ -82,10 +77,11 @@ public class AlphabetAI implements Player {
 			bestMove = lastBest;
 		}
 		System.out.println("Reached depth "+depth+" in "+(lastTime)/1000000000.0+"s");
+			
 		return bestMove;
 	}
 	
-	private int search(int depth, Move m, Board b, int team, int alpha, int beta) {
+	private int search(int depth, Move m, Board b, int team) {
 		if(depth == 0) {
 			int score = evaluate(m, b.applyMove(m));
 			b.undoMove(m);
@@ -95,21 +91,18 @@ public class AlphabetAI implements Player {
 		b.applyMove(m);
 		ArrayList<Move> branches = b.getValidMovesSingleThread(-team);
 				
-		int value;
-		if(team == playerTeam) { //Maximizing
+		int value;// = (Integer.MIN_VALUE+1)*team*playerTeam;
+		if(team == Piece.RED) {
 			value = Integer.MIN_VALUE;
 			if(branches.size() == 0) {
 				b.undoMove(m);
 				return Integer.MAX_VALUE;
 			}
+			
 			for(Move next : branches) {
-				int score = search(depth-1, next, b, -team, alpha, beta);
-				int score2 = regularSearch(depth-1, next, b, -team);
+				int score = search(depth-1, next, b, -team);
 				if(score > value) {
-					alpha = value = score;
-				}
-				if(beta < value) {
-					break;
+					value = score;
 				}
 			}
 		} else {
@@ -119,13 +112,9 @@ public class AlphabetAI implements Player {
 				return Integer.MIN_VALUE;
 			}
 			for(Move next : branches) {
-				int score = search(depth-1, next, b, -team, alpha, beta);
-				int score2 = regularSearch(depth-1, next, b, -team);
+				int score = search(depth-1, next, b, -team);
 				if(score < value) {
-					beta = value = score;
-				}
-				if(value < alpha) {
-					break;
+					value = score;
 				}
 			}
 		}
@@ -133,7 +122,7 @@ public class AlphabetAI implements Player {
 		return value;
 	}
 	
-	private int regularSearch(int depth, Move m, Board b, int team) {
+	private int max(int depth, Move m, Board b) {
 		if(depth == 0) {
 			int score = evaluate(m, b.applyMove(m));
 			b.undoMove(m);
@@ -141,32 +130,44 @@ public class AlphabetAI implements Player {
 		}
 
 		b.applyMove(m);
-		ArrayList<Move> branches = b.getValidMovesSingleThread(-team);
+		ArrayList<Move> branches = b.getValidMovesSingleThread(Piece.BLACK);
 				
-		int value;
-		if(team == playerTeam) {
-			value = Integer.MIN_VALUE;
-			if(branches.size() == 0) {
-				b.undoMove(m);
-				return Integer.MAX_VALUE;
+		int value = Integer.MIN_VALUE;
+		if(branches.size() == 0) {
+			b.undoMove(m);
+			return Integer.MAX_VALUE;
+		}
+		
+		for(Move next : branches) {
+			int score = min(depth-1, next, b);
+			if(score > value) {
+				value = score;
 			}
-			for(Move next : branches) {
-				int score = regularSearch(depth-1, next, b, -team);
-				if(score > value) {
-					value = score;
-				}
-			}
-		} else {
-			value = Integer.MAX_VALUE;
-			if(branches.size() == 0) {
-				b.undoMove(m);
-				return Integer.MIN_VALUE;
-			}
-			for(Move next : branches) {
-				int score = regularSearch(depth-1, next, b, -team);
-				if(score < value) {
-					value = score;
-				}
+		}
+		b.undoMove(m);
+		return value;
+	}
+	
+	private int min(int depth, Move m, Board b) {
+		if(depth == 0) {
+			int score = evaluate(m, b.applyMove(m));
+			b.undoMove(m);
+			return score;
+		}
+
+		b.applyMove(m);
+		ArrayList<Move> branches = b.getValidMovesSingleThread(Piece.RED);
+				
+		int value = Integer.MAX_VALUE;
+		if(branches.size() == 0) {
+			b.undoMove(m);
+			return Integer.MIN_VALUE;
+		}
+		
+		for(Move next : branches) {
+			int score = max(depth-1, next, b);
+			if(score < value) {
+				value = score;
 			}
 		}
 		b.undoMove(m);
@@ -175,11 +176,7 @@ public class AlphabetAI implements Player {
 	
 	//heuristic
 	public int evaluate(Move m, Board b) {
-		if(playerTeam == Piece.RED) {
-			return b.getRedPieces().size()-b.getBlackPieces().size();
-		} else {
-			return b.getBlackPieces().size()-b.getRedPieces().size();
-	}
+		return b.getRedPieces().size()-b.getBlackPieces().size();
 	}
 	
 	public int getTeam() {

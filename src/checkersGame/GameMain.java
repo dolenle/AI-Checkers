@@ -15,8 +15,8 @@ public class GameMain {
 		//loadBoard("moveTest.txt", b);
 		b.defaultStart();
 		
-		Player p1 = new HumanPlayer(Piece.BLACK);
-		Player p2 = new OkayAI(Piece.RED);
+		Player p1 = new OkayAI2(Piece.BLACK);
+		Player p2 = new AlphabetAI(Piece.RED);
 		
 		ArrayList<Move> blackMoves, redMoves;
 		
@@ -35,7 +35,6 @@ public class GameMain {
 			System.out.println();
 			b.applyMove(m);
 			b.printBoard();
-			//System.out.println("Player 1 Heuristic: "+p1.evaluate(m, b));
 			
 			b.isConsistent();
 			
@@ -51,7 +50,6 @@ public class GameMain {
 			}
 			System.out.println();
 			b.applyMove(m);
-			//System.out.println("Player 2 Heuristic: "+p1.evaluate(m, b));
 		}
 		b.printBoard();
 	}
