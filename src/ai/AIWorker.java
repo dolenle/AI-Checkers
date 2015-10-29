@@ -1,7 +1,11 @@
-package checkersGame;
+package ai;
 
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
+
+import checkersGame.Board;
+import checkersGame.Move;
+import checkersGame.Piece;
 
 public class AIWorker implements Callable<Integer> {
 	

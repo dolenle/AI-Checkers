@@ -1,8 +1,13 @@
-package checkersGame;
+package ai;
 
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
+
+import checkersGame.Board;
+import checkersGame.Move;
+import checkersGame.Piece;
+import checkersGame.Player;
 
 public class OkayAI implements Player {
 	private long timeLimit;

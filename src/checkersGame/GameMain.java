@@ -3,6 +3,8 @@ package checkersGame;
 import java.io.*;
 import java.util.ArrayList;
 
+import ai.*;
+
 public class GameMain {
 	
 	static Board b = new Board(1);

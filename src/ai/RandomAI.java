@@ -1,7 +1,11 @@
-package checkersGame;
+package ai;
 
 import java.util.ArrayList;
 import java.util.Random;
+
+import checkersGame.Board;
+import checkersGame.Move;
+import checkersGame.Player;
 
 public class RandomAI implements Player {
 	int team;

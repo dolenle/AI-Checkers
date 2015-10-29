@@ -1,4 +1,4 @@
-package checkersGame;
+package ai;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -6,6 +6,10 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import checkersGame.Board;
+import checkersGame.Move;
+import checkersGame.Player;
 
 /**
  * An attempt at making a multithreaded version of OkayAI
