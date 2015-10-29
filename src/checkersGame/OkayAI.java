@@ -25,15 +25,15 @@ public class OkayAI implements Player {
 	}
 	
 	public Move selectMove(ArrayList<Move> validMoves, Board b) {
-		int depth = 3;
+		int depth = 1;
 		Move bestMove = validMoves.get(0);
 		Move nextBest = bestMove;
 		if(validMoves.size() == 1) {
 			return bestMove;
 		}
 		long start = System.nanoTime();
-//		while(System.nanoTime() - start < timeLimit) {
-			int best = 0;
+		while(System.nanoTime() - start < timeLimit) {
+			int best = Integer.MIN_VALUE;
 			bestMove = nextBest;
 			for(Move m : validMoves) {
 				int score = search(depth, m, b, playerTeam);
@@ -42,9 +42,13 @@ public class OkayAI implements Player {
 					bestMove = m;
 				}
 			}
-//			depth++;
-//		}
-		System.out.println("Reached depth "+depth);
+			depth++;
+		}
+		long elapsed = System.nanoTime() - start;
+		if(elapsed>timeLimit) {
+			System.out.println("Time limit exceeded! Deduct Points!");
+		}
+		System.out.println("Reached depth "+depth+" in "+elapsed/1000000000.0+"s");
 		return bestMove;
 	}
 	

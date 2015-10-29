@@ -13,8 +13,8 @@ public class GameMain {
 		//loadBoard("test.txt", b);
 		b.defaultStart();
 		
-		Player p1 = new OkayAI(Piece.BLACK);
-		Player p2 = new RandomAI(Piece.RED);
+		Player p1 = new RandomAI(Piece.BLACK);
+		Player p2 = new MultiThreadAI(Piece.RED);
 		
 		ArrayList<Move> blackMoves, redMoves;
 		
@@ -34,6 +34,8 @@ public class GameMain {
 			b.applyMove(m);
 			b.printBoard();
 			//System.out.println("Player 1 Heuristic: "+p1.evaluate(m, b));
+			
+			b.isConsistent();
 			
 			redMoves = b.getValidMovesSingleThread(Piece.RED);
 			if(redMoves.size() == 0) {

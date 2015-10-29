@@ -233,21 +233,80 @@ public class Board {
 	
 	public Board clone() { //what a terrible terrible thing
 		Board b = new Board(size);
-		b.setLocs(new Piece[64]);
+		Piece[] newLocs = new Piece[64];
+		b.setLocs(newLocs);
 		ArrayList<Piece> blackCopy = new ArrayList<Piece>(blackPieces.size());
 		ArrayList<Piece> redCopy = new ArrayList<Piece>(redPieces.size());
 		for(Piece bPiece : blackPieces) {
 			Piece newB = new Piece(bPiece);
 			blackCopy.add(newB);
-			b.pieceLocs[bPiece.getY()*8 + bPiece.getX()] = newB;
+			newLocs[bPiece.getY()*8 + bPiece.getX()] = newB;
 		}
 		for(Piece rPiece : redPieces) {
 			Piece newR = new Piece(rPiece);
 			redCopy.add(newR);
-			b.pieceLocs[rPiece.getY()*8 + rPiece.getX()] = newR;
+			newLocs[rPiece.getY()*8 + rPiece.getX()] = newR;
 		}
 		b.setPieces(blackCopy, redCopy);
 		return b;
+	}
+	
+	public ArrayList<Piece> applyAnonymousMove(Move m) {
+		ArrayList<Piece> captures = new ArrayList<Piece>();
+		Piece p = pieceLocs[m.getPiece().getY()*8 + m.getPiece().getX()];
+		int team = p.getTeam();
+		Step s = m.getSteps().peekLast();
+		pieceLocs[p.getY()*8 + p.getX()] = null;
+		p.moveTo(s.getX(), s.getY());
+		pieceLocs[s.getY()*8 + s.getX()] = p;
+		
+		ArrayList<Piece> opponent;
+		if(team == Piece.BLACK) {
+			opponent = redPieces;
+		} else {
+			opponent = blackPieces;
+		}
+		for(Piece cp : m.getCaptures()) {
+			Piece captured = pieceLocs[cp.getY()*8 + cp.getX()];
+			pieceLocs[cp.getY()*8 + cp.getX()] = null;
+			opponent.remove(captured);
+			captures.add(captured);
+			if(captured.isKing()) {
+				kingCount[-team+1]--;
+			}
+		}
+		if(m.isPromotion()) {
+			p.promote();
+			kingCount[team+1]++;
+		}
+		return captures;
+	}
+	
+	public Board undoAnonymousMove(Move m, ArrayList<Piece> captures) {
+		Step s = m.getSteps().peekLast();
+		Piece p = pieceLocs[s.getY()*8 + s.getX()];
+		int team = p.getTeam();
+		ArrayList<Piece> opponent;
+		if(team == Piece.BLACK) {
+			opponent = redPieces;
+		} else {
+			opponent = blackPieces;
+		}
+		for(Piece cp :captures) {
+			pieceLocs[cp.getY()*8 + cp.getX()] = cp;
+			opponent.add(cp);
+			if(cp.isKing()) {
+				kingCount[-team+1]++;
+			}
+		}
+		pieceLocs[p.getY()*8 + p.getX()] = null;
+		p.moveTo(m.getStartX(), m.getStartY());
+		pieceLocs[p.getY()*8 + p.getX()] = p;
+		if(m.isPromotion()) {
+			p.demote();
+			kingCount[team+1]--;
+		}
+		return this;
 	}
 	
 	public ArrayList<Piece> getBlackPieces() {
