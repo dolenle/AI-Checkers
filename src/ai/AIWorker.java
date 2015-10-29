@@ -29,7 +29,6 @@ public class AIWorker implements Callable<Integer> {
 		if(depth == 0) {
 			ArrayList<Piece> cap = b.applyAnonymousMove(m);
 			int score = evaluate(m, b);
-			b.isConsistent();
 			b.undoAnonymousMove(m, cap);
 			return score;
 		}
@@ -41,6 +40,7 @@ public class AIWorker implements Callable<Integer> {
 		if(team == playerTeam) {
 			value = Integer.MIN_VALUE;
 			if(branches.size() == 0) {
+				b.undoAnonymousMove(m, cap);
 				return Integer.MAX_VALUE;
 			}
 			for(Move next : branches) {
@@ -52,6 +52,7 @@ public class AIWorker implements Callable<Integer> {
 		} else {
 			value = Integer.MAX_VALUE;
 			if(branches.size() == 0) {
+				b.undoAnonymousMove(m, cap);
 				return Integer.MIN_VALUE;
 			}
 			for(Move next : branches) {
@@ -67,9 +68,9 @@ public class AIWorker implements Callable<Integer> {
 	
 	public int evaluate(Move m, Board b) {
 		if(playerTeam == Piece.RED) {
-			return b.getRedPieces().size()+b.getKingCount(Piece.RED)-b.getBlackPieces().size()+(m.getCaptures().size()*m.getPiece().getTeam()*playerTeam)-b.getKingCount(Piece.BLACK);
+			return b.getRedPieces().size()-b.getBlackPieces().size()+(m.getCaptures().size()*m.getPiece().getTeam()*playerTeam);
 		} else {
-			return b.getBlackPieces().size()+b.getKingCount(Piece.BLACK)-b.getRedPieces().size()+(m.getCaptures().size()*m.getPiece().getTeam()*playerTeam)-b.getKingCount(Piece.RED);
+			return b.getBlackPieces().size()-b.getRedPieces().size()+(m.getCaptures().size()*m.getPiece().getTeam()*playerTeam);
 		}
 	}
 }

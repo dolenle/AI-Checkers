@@ -9,13 +9,13 @@ import checkersGame.Move;
 import checkersGame.Piece;
 import checkersGame.Player;
 
-public class OkayAI implements Player {
+public class AlphabetAI implements Player {
 	private long timeLimit;
 	private int playerTeam;
 	private Scanner input = new Scanner(System.in);
 	private Random rand = new Random();
 			
-	public OkayAI(int team) {
+	public AlphabetAI(int team) {
 		playerTeam = team;
 		int seconds = 0;
 		do {
@@ -44,7 +44,7 @@ public class OkayAI implements Player {
 			int best = Integer.MIN_VALUE;
 			lastBest = bestMove;
 			for(Move m : validMoves) {
-				int score = search(depth, m, b, playerTeam);
+				int score = search(depth, m, b, playerTeam, Integer.MIN_VALUE, Integer.MAX_VALUE);
 				if(score > best || score == best && rand.nextBoolean()) {
 					best = score;
 					bestMove = m;
@@ -61,7 +61,67 @@ public class OkayAI implements Player {
 		return bestMove;
 	}
 	
-	private int search(int depth, Move m, Board b, int team) {
+	private int search(int depth, Move m, Board b, int team, int alpha, int beta) {
+		if(depth == 0) {
+			int score = evaluate(m, b.applyMove(m));
+			b.undoMove(m);
+			return score;
+		}
+
+		b.applyMove(m);
+		ArrayList<Move> branches = b.getValidMovesSingleThread(-team);
+				
+		int value;
+		if(team == playerTeam) {
+			value = Integer.MIN_VALUE;
+			if(branches.size() == 0) {
+				b.undoMove(m);
+				return Integer.MAX_VALUE;
+			}
+			for(Move next : branches) {
+				int score = search(depth-1, next, b, -team, alpha, beta);
+				int score2 = regularSearch(depth-1, next, b, -team);
+				if(score != score2) {
+					System.out.println("AlphaBeta result mismatch!"+score+" vs "+score2);
+				}
+				if(score > value) {
+					value = score;
+				}
+				if(value > alpha) {
+					alpha = value;
+				}
+				if(beta <= alpha) {
+					break;
+				}
+			}
+		} else {
+			value = Integer.MAX_VALUE;
+			if(branches.size() == 0) {
+				b.undoMove(m);
+				return Integer.MIN_VALUE;
+			}
+			for(Move next : branches) {
+				int score = search(depth-1, next, b, -team, alpha, beta);
+				int score2 = regularSearch(depth-1, next, b, -team);
+				if(score != score2) {
+					System.out.println("AlphaBeta result mismatch!"+score+" vs "+score2);
+				}
+				if(score < value) {
+					value = score;
+				}
+				if(value < beta) {
+					beta = value;
+				}
+				if(beta <= alpha) {
+					break;
+				}
+			}
+		}
+		b.undoMove(m);
+		return value;
+	}
+	
+	private int regularSearch(int depth, Move m, Board b, int team) {
 		if(depth == 0) {
 			int score = evaluate(m, b.applyMove(m));
 			b.undoMove(m);
@@ -79,7 +139,7 @@ public class OkayAI implements Player {
 				return Integer.MAX_VALUE;
 			}
 			for(Move next : branches) {
-				int score = search(depth-1, next, b, -team);
+				int score = regularSearch(depth-1, next, b, -team);
 				if(score > value) {
 					value = score;
 				}
@@ -91,7 +151,7 @@ public class OkayAI implements Player {
 				return Integer.MIN_VALUE;
 			}
 			for(Move next : branches) {
-				int score = search(depth-1, next, b, -team);
+				int score = regularSearch(depth-1, next, b, -team);
 				if(score < value) {
 					value = score;
 				}
@@ -103,31 +163,10 @@ public class OkayAI implements Player {
 	
 	//heuristic
 	public int evaluate(Move m, Board b) {
-//		int redScore, blackScore, score;
-//		redScore = 4*(b.getRedPieces().size());
-//		redScore += 2*b.getKingCount(Piece.RED);
-//		blackScore = 4*(b.getBlackPieces().size());
-//		blackScore += 2*b.getKingCount(Piece.BLACK);
-//		
-//		if(playerTeam == Piece.RED) {
-//			if(blackScore == 0) {
-//				return Integer.MAX_VALUE;
-//			}
-//			score = (redScore*1024)/blackScore;
-//		} else {
-//			if(redScore == 0) {
-//				return Integer.MAX_VALUE;
-//			}
-//			score = (blackScore*1024)/redScore;
-//		}
-//		if(m.isPromotion()) {
-//			score += 1000;
-//		}
-//		return score;
 		if(playerTeam == Piece.RED) {
-			return b.getRedPieces().size()-b.getBlackPieces().size()+(m.getCaptures().size()*m.getPiece().getTeam()*playerTeam);
+			return b.getRedPieces().size()+b.getKingCount(Piece.RED)-b.getBlackPieces().size()+(m.getCaptures().size()*m.getPiece().getTeam()*playerTeam);
 		} else {
-			return b.getBlackPieces().size()-b.getRedPieces().size()+(m.getCaptures().size()*m.getPiece().getTeam()*playerTeam);
+			return b.getBlackPieces().size()+b.getKingCount(Piece.BLACK)-b.getRedPieces().size()+(m.getCaptures().size()*m.getPiece().getTeam()*playerTeam);
 		}
 	}
 	

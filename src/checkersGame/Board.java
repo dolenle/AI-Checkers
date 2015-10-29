@@ -248,6 +248,7 @@ public class Board {
 			newLocs[rPiece.getY()*8 + rPiece.getX()] = newR;
 		}
 		b.setPieces(blackCopy, redCopy);
+		b.kingCount = kingCount.clone();
 		return b;
 	}
 	

@@ -12,7 +12,7 @@ import checkersGame.Move;
 import checkersGame.Player;
 
 /**
- * An attempt at making a multithreaded version of OkayAI
+ * A feeble attempt at making a multithreaded version of OkayAI
  *
  */
 

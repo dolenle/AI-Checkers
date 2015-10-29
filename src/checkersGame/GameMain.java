@@ -15,7 +15,7 @@ public class GameMain {
 		//loadBoard("test.txt", b);
 		b.defaultStart();
 		
-		Player p1 = new RandomAI(Piece.BLACK);
+		Player p1 = new OkayAI(Piece.BLACK);
 		Player p2 = new MultiThreadAI(Piece.RED);
 		
 		ArrayList<Move> blackMoves, redMoves;
