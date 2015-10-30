@@ -54,11 +54,11 @@ public class OkayAI implements Player {
 			long lastTime = System.nanoTime();
 			for(Move m : validMoves) {
 				try {
-				int score = search(depth, m, b, playerTeam);
-				if(score > best || score == best && rand.nextBoolean()) {
-					best = score;
-					bestMove = m;
-				}
+					int score = search(depth, m, b, playerTeam);
+					if(score > best || score == best && rand.nextBoolean()) {
+						best = score;
+						bestMove = m;
+					}
 				} catch(TimeoutException te) {
 					System.out.println("Search time limit reached. Reverting to depth "+--depth);
 					System.out.println("Reached depth "+depth+" in "+(lastTime - startTime)/1000000000.0+"s");
@@ -129,32 +129,32 @@ public class OkayAI implements Player {
 	
 	//heuristic
 	public int evaluate(Move m, Board b) {
-		int redScore, blackScore, score;
-		redScore = 4*(b.getRedPieces().size());
-		redScore += 2*b.getKingCount(Piece.RED);
-		blackScore = 4*(b.getBlackPieces().size());
-		blackScore += 2*b.getKingCount(Piece.BLACK);
-		
-		if(playerTeam == Piece.RED) {
-			if(blackScore == 0) {
-				return Integer.MAX_VALUE;
-			}
-			score = (redScore*1024)/blackScore;
-		} else {
-			if(redScore == 0) {
-				return Integer.MAX_VALUE;
-			}
-			score = (blackScore*1024)/redScore;
-		}
-		if(m.isPromotion()) {
-			score += 1000;
-		}
-		return score;
+//		int redScore, blackScore, score;
+//		redScore = 4*(b.getRedPieces().size());
+//		redScore += 2*b.getKingCount(Piece.RED);
+//		blackScore = 4*(b.getBlackPieces().size());
+//		blackScore += 2*b.getKingCount(Piece.BLACK);
+//		
 //		if(playerTeam == Piece.RED) {
-//			return b.getRedPieces().size()-b.getBlackPieces().size();
+//			if(blackScore == 0) {
+//				return Integer.MAX_VALUE;
+//			}
+//			score = (redScore*1024)/blackScore;
 //		} else {
-//			return b.getBlackPieces().size()-b.getRedPieces().size();
+//			if(redScore == 0) {
+//				return Integer.MAX_VALUE;
+//			}
+//			score = (blackScore*1024)/redScore;
 //		}
+//		if(m.isPromotion()) {
+//			score += 1000;
+//		}
+//		return score;
+		if(playerTeam == Piece.RED) {
+			return b.getRedPieces().size()-b.getBlackPieces().size();
+		} else {
+			return b.getBlackPieces().size()-b.getRedPieces().size();
+		}
 	}
 	
 	public int getTeam() {

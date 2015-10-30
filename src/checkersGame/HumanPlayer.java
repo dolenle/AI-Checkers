@@ -63,7 +63,7 @@ public class HumanPlayer implements Player {
 	private void getHelp(ArrayList<Move> validMoves, Board b) {
 		System.out.println("Asking an AI for help...");
 		Random rand = new Random();
-		int x = rand.nextInt(4);
+		int x = rand.nextInt(5);
 		String aiName=null, thinkText=null, resultText=null, prologue=null;
 		Player ai = null;
 		switch(x) {
@@ -86,14 +86,21 @@ public class HumanPlayer implements Player {
 			thinkText = "Okay, I'll have a look at the board.";
 			resultText = "Okay, if it were up to me, I would choose";
 			prologue = ". Does that sound okay to you?";
-			ai = new OkayAI(team, 3);
+			ai = new OkayAI(team, 5);
 			break;
 		case 3:
 			aiName = "MultiThreadAI";
 			thinkText = "I'll have my team of highly trained monkeys work on your question ASAP.";
 			resultText = "My team of monkeys has reached a conclusion. You should play";
 			prologue = ". Good luck.";
-			ai = new MultiThreadAI(team, 3);
+			ai = new MultiThreadAI(team, 5);
+			break;
+		case 4:
+			aiName = "AlphabetAI";
+			thinkText = "Howdy. I hear you've got some trees that need pruning...?";
+			resultText = "Well, job's done. All I have to say is, pick ";
+			prologue = ". Also, what do I do with all these leftover branches?";
+			ai = new AlphabetAI(team, 5);
 			break;
 		}
 		System.out.println(aiName+" says: \""+thinkText+"\"");
