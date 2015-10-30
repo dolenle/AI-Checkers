@@ -48,7 +48,7 @@ public class OkayAI implements Player {
 		long startTime = System.nanoTime();
 		stopTime = startTime+timeLimit;
 		
-		while(best != Integer.MAX_VALUE) {
+		while(best != Integer.MAX_VALUE) { //stop early if guaranteed win
 			best = Integer.MIN_VALUE;
 			lastBest = bestMove;
 			long lastTime = System.nanoTime();

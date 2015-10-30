@@ -7,7 +7,7 @@ import ai.*;
 
 public class GameMain {
 	
-	static Board b = new Board(1);
+	static Board b = new Board(3);
 	
 	//Run from terminal: java checkersGame.GameMain
 	public static void main(String[] args) {
@@ -15,7 +15,7 @@ public class GameMain {
 		//loadBoard("moveTest.txt", b);
 		b.defaultStart();
 		
-		Player p1 = new MultiThreadAI(Piece.BLACK);
+		Player p1 = new AlphabetAI(Piece.BLACK);
 		Player p2 = new AlphabetAI(Piece.RED);
 		
 		ArrayList<Move> blackMoves, redMoves;
@@ -34,6 +34,7 @@ public class GameMain {
 			}
 			System.out.println();
 			b.applyMove(m);
+			b.markMove(m);
 			b.printBoard();
 			
 			b.isConsistent();
@@ -50,6 +51,7 @@ public class GameMain {
 			}
 			System.out.println();
 			b.applyMove(m);
+			b.markMove(m);
 		}
 		b.printBoard();
 	}

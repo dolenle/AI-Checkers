@@ -24,6 +24,9 @@ public class Board {
 	
 	private int kingCount[] = {0, 0, 0};
 	
+	private int lastX=-1, lastY=-1;
+	private Piece lastMovePiece = null;
+	
 	public Board(int squareSize) {
 		if (squareSize%2 == 0 || squareSize < 0) {
 			System.err.println("Square size must be odd.");
@@ -58,10 +61,15 @@ public class Board {
 					if(j%size == thresh1 && i%size == thresh1) {
 						Piece p = pieceLocs[j/size*8+(i-offset)/size];
 						if(p == null) {
-							System.out.print(blank+end);
+							if(j/size == lastY && (i-offset)/size == lastX) {
+								System.out.print(colors[lastMovePiece.getTeam()+1]+"* "+end);
+								lastX = lastY = -1; //unmark
+							} else {
+								System.out.print(blank+end);
+							}
 						} else {
 							if(p.isKing()) {
-								System.out.print("\u001B[7m");
+								System.out.print("\u001B[7m"); //invert colors
 							}
 							System.out.print(colors[p.getTeam()+1]+UTFLargeDot+end);
 						}
@@ -301,6 +309,12 @@ public class Board {
 			kingCount[team+1]--;
 		}
 		return this;
+	}
+	
+	public void markMove(Move m) {
+		lastX = m.getStartX();
+		lastY = m.getStartY();
+		lastMovePiece = m.getPiece();
 	}
 	
 	public Piece getPiece(int x, int y) {
