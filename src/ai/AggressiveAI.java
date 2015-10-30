@@ -10,16 +10,43 @@ import checkersGame.Move;
 import checkersGame.Piece;
 import checkersGame.Player;
 
-public class AlphabetAI implements Player {
+public class AggressiveAI implements Player {
 	private long timeLimit;
 	private int playerTeam;
 	private Scanner input = new Scanner(System.in);
 	private Random rand = new Random();
 	
 	private long stopTime;
-				
-	public AlphabetAI(int team) {
+	
+	private int[] aggressiveWeights = {	0, 0, 0, 0, 0, 0, 0, 0,
+										0, 1, 1, 1, 1, 1, 1, 0,
+										0, 1, 2, 4, 4, 2, 1, 0,
+										2, 4, 8, 8, 8, 8, 4, 2,
+										2, 4, 8, 8, 8, 8, 4, 2,
+										0, 1, 2, 4, 4, 2, 1, 0,
+										0, 1, 1, 1, 1, 1, 1, 0,
+										0, 0, 0, 0, 0, 0, 0, 0 };
+	
+	public AggressiveAI(int team, int time) {
 		playerTeam = team;
+		timeLimit = ((long) time)*1000000000;
+		int opposite, home;
+		if(team == Piece.RED) {
+			opposite = 0;
+			home = 56;
+		} else {
+			home = 0;
+			opposite = 56;
+		}
+		for(int i=0; i<8; i++) {
+			aggressiveWeights[opposite+i] = 8;
+			aggressiveWeights[opposite+i-team*8]*=4;
+			aggressiveWeights[home+i] = -1;
+		}
+	}
+	
+	public AggressiveAI(int team) {
+		this(team, 1);
 		int seconds = 0;
 		do {
 			System.out.print("Please enter a time limit in seconds: ");
@@ -30,11 +57,6 @@ public class AlphabetAI implements Player {
 			}
 		} while(seconds < 0 || seconds > 30);
 		timeLimit = ((long) seconds)*1000000000;
-	}
-	
-	public AlphabetAI(int team, int time) {
-		playerTeam = team;
-		timeLimit = ((long) time)*1000000000;
 	}
 	
 	public Move selectMove(ArrayList<Move> validMoves, Board b) {
@@ -142,32 +164,30 @@ public class AlphabetAI implements Player {
 	
 	//heuristic
 	public int evaluate(Move m, Board b) {
-//		int redScore, blackScore, score;
-//		redScore = 4*(b.getRedPieces().size());
-//		redScore += 2*b.getKingCount(Piece.RED);
-//		blackScore = 4*(b.getBlackPieces().size());
-//		blackScore += 2*b.getKingCount(Piece.BLACK);
-//		
-//		if(playerTeam == Piece.RED) {
-//			if(blackScore == 0) {
-//				return Integer.MAX_VALUE;
-//			}
-//			score = (redScore*1024)/blackScore;
-//		} else {
-//			if(redScore == 0) {
-//				return Integer.MAX_VALUE;
-//			}
-//			score = (blackScore*1024)/redScore;
-//		}
-//		if(m.isPromotion()) {
-//			score += 1000;
-//		}
-//		return score;
+		int score;
+		ArrayList<Piece> myPieces, opponentPieces;
 		if(playerTeam == Piece.RED) {
-			return b.getRedPieces().size()-b.getBlackPieces().size();
+			myPieces = b.getRedPieces();
+			opponentPieces = b.getBlackPieces();
 		} else {
-			return b.getBlackPieces().size()-b.getRedPieces().size();
+			opponentPieces = b.getRedPieces();
+			myPieces = b.getBlackPieces();
 		}
+		score = (myPieces.size()-opponentPieces.size())*2097152;
+		score += (b.getKingCount(playerTeam) - b.getKingCount(-playerTeam))*1024;
+		score += m.getCaptures().size()*m.getPiece().getTeam()*playerTeam;
+		for(Piece p : myPieces) {
+			score += 64*aggressiveWeights[p.getY()*8+p.getX()];
+			if(p.isKing()) {
+				score += 16*aggressiveWeights[p.getY()*8+p.getX()];
+			}
+			if(opponentPieces.size() <= 5) {
+				for(Piece o : opponentPieces) {
+					score += 512/(Math.abs(p.getX()-o.getX())+Math.abs(p.getY()-o.getY()));
+				}
+			}
+		}
+		return score;
 	}
 	
 	public int getTeam() {

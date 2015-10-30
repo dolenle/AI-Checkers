@@ -98,7 +98,7 @@ public class HumanPlayer implements Player {
 		case 4:
 			aiName = "AlphabetAI";
 			thinkText = "Howdy. I hear you've got some trees that need pruning...?";
-			resultText = "Well, job's done. All I have to say is, pick ";
+			resultText = "Well, job's done. All I have to say is, pick";
 			prologue = ". Also, what do I do with all these leftover branches?";
 			ai = new AlphabetAI(team, 5);
 			break;

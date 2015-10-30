@@ -15,8 +15,8 @@ public class GameMain {
 		//loadBoard("moveTest.txt", b);
 		b.defaultStart();
 		
-		Player p1 = new ConstantAI(Piece.BLACK);
-		Player p2 = new OkayAI2(Piece.RED);
+		Player p1 = new AlphabetAI(Piece.BLACK);
+		Player p2 = new AggressiveAI(Piece.RED);
 		
 		ArrayList<Move> blackMoves, redMoves;
 		
