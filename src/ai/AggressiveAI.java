@@ -55,7 +55,7 @@ public class AggressiveAI implements Player {
 			} catch (Exception e) {
 				input.next();
 			}
-		} while(seconds < 0 || seconds > 30);
+		} while(seconds < 0);
 		timeLimit = ((long) seconds)*1000000000;
 	}
 	
@@ -71,6 +71,8 @@ public class AggressiveAI implements Player {
 		long startTime = System.nanoTime();
 		stopTime = startTime + timeLimit;
 		
+		//Move bestMoves[] = new Move[validMoves.size()];
+		
 		while(best != Integer.MAX_VALUE) {
 			best = Integer.MIN_VALUE;
 			lastBest = bestMove;
@@ -79,11 +81,14 @@ public class AggressiveAI implements Player {
 			int alpha = Integer.MIN_VALUE;
 			int beta = Integer.MAX_VALUE;
 			
+			int i=1;
 			for(Move m : validMoves) {
 				try {
 					int score = search(depth, m, b, playerTeam, alpha, beta);
-					if(score > best || score == best && rand.nextBoolean()) {
+					if(score > best) {
 						alpha = best = score;
+						bestMove = m;
+					} else if(score == best && rand.nextInt(++i)==0) { //uniform randomness
 						bestMove = m;
 					}
 					if(beta < best) {
@@ -98,7 +103,6 @@ public class AggressiveAI implements Player {
 			
 			depth++;
 		}
-
 		System.out.println("Reached depth "+(depth-1)+" in "+(System.nanoTime() - startTime)/1000000000.0+"s");
 		return bestMove;
 	}
@@ -175,7 +179,10 @@ public class AggressiveAI implements Player {
 		}
 		score = (myPieces.size()-opponentPieces.size())*2097152;
 		score += (b.getKingCount(playerTeam) - b.getKingCount(-playerTeam))*1024;
-		score += m.getCaptures().size()*m.getPiece().getTeam()*playerTeam;
+		//score += m.getCaptures().size()*m.getPiece().getTeam()*playerTeam;
+		if(m.getPiece().isKing()) {
+			score += 4096*m.getCaptures().size()*m.getTeam()*playerTeam;
+		}
 		for(Piece p : myPieces) {
 			score += 64*aggressiveWeights[p.getY()*8+p.getX()];
 			if(p.isKing()) {

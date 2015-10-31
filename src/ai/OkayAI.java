@@ -28,7 +28,7 @@ public class OkayAI implements Player {
 			} catch (Exception e) {
 				input.next();
 			}
-		} while(seconds < 0 || seconds > 30);
+		} while(seconds < 0);
 		timeLimit = ((long) seconds)*1000000000;
 	}
 	

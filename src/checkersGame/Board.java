@@ -13,7 +13,7 @@ public class Board {
 	private String wht = "\u001B[47m  " + "\u001B[0m";
 	private String end =  "\u001B[0m";
 	
-	private String[] colors = {"\u001B[1m\u001B[31m", null, "\u001B[1m\u001B[32m"}; //34 cyan, 32 green
+	private String[] colors = {"\u001B[1m\u001B[31m", null, "\u001B[1m\u001B[34m"}; //34 blue, 32 green
 	private static final String UTFLargeDot = "\u2B24 ";
 	
 	private String blank = "  ";
@@ -72,6 +72,14 @@ public class Board {
 								System.out.print("\u001B[7m"); //invert colors
 							}
 							System.out.print(colors[p.getTeam()+1]+UTFLargeDot+end);
+						}
+					} else if(j%size == 0) {
+						if(i%size == 0) {
+							System.out.print("\u001B[32m"+((i-offset)/size)+" "+end);
+						} else if(i%size == size-1) {
+							System.out.print("\u001B[32m "+j/size+end);
+						} else {
+							System.out.print(blank+end);
 						}
 					} else {
 						System.out.print(blank+end);

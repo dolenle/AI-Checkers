@@ -10,6 +10,7 @@ public class Move {
 	private ArrayList<Piece> captures = new ArrayList<Piece>();
 	private int startX;
 	private int startY;
+	private int team;
 	
 	/**
 	 * Constructor for a Move, which consists of one or more Steps for a given Piece.
@@ -28,6 +29,7 @@ public class Move {
 		}
 		startX = p.getX();
 		startY = p.getY();
+		team = p.getTeam();
 	}
 	
 	/**
@@ -73,5 +75,9 @@ public class Move {
 	
 	public int getStartY() {
 		return startY;
+	}
+	
+	public int getTeam() {
+		return team;
 	}
 }

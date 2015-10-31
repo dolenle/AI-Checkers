@@ -63,10 +63,10 @@ public class HumanPlayer implements Player {
 	private void getHelp(ArrayList<Move> validMoves, Board b) {
 		System.out.println("Asking an AI for help...");
 		Random rand = new Random();
-		int x = rand.nextInt(5);
+		int x = rand.nextInt(6);
 		String aiName=null, thinkText=null, resultText=null, prologue=null;
 		Player ai = null;
-		switch(x) {
+		switch(5) {
 		case 0:
 			aiName = "RandomAI";
 			thinkText = "Huh? You need help?... Um.... sure, I guess.";
@@ -99,8 +99,15 @@ public class HumanPlayer implements Player {
 			aiName = "AlphabetAI";
 			thinkText = "Howdy. I hear you've got some trees that need pruning...?";
 			resultText = "Well, job's done. All I have to say is, pick";
-			prologue = ". Also, what do I do with all these leftover branches?";
+			prologue = ". What should I do with all these leftover branches?";
 			ai = new AlphabetAI(team, 5);
+			break;
+		case 5:
+			aiName = "AggressiveAI";
+			thinkText = "I am thinking";
+			resultText = "I choose";
+			prologue = ".";
+			ai = new AggressiveAI(team, 5);
 			break;
 		}
 		System.out.println(aiName+" says: \""+thinkText+"\"");

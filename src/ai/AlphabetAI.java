@@ -28,7 +28,7 @@ public class AlphabetAI implements Player {
 			} catch (Exception e) {
 				input.next();
 			}
-		} while(seconds < 0 || seconds > 30);
+		} while(seconds < 0);
 		timeLimit = ((long) seconds)*1000000000;
 	}
 	
@@ -57,11 +57,16 @@ public class AlphabetAI implements Player {
 			int alpha = Integer.MIN_VALUE;
 			int beta = Integer.MAX_VALUE;
 			
+			int i=1;
+			
 			for(Move m : validMoves) {
 				try {
 					int score = search(depth, m, b, playerTeam, alpha, beta);
-					if(score > best || score == best && rand.nextBoolean()) {
+					if(score > best) {
 						alpha = best = score;
+						bestMove = m;
+						i = 1;
+					} else if(score == best && rand.nextInt(++i)==0) { //uniform randomness
 						bestMove = m;
 					}
 					if(beta < best) {
@@ -142,32 +147,32 @@ public class AlphabetAI implements Player {
 	
 	//heuristic
 	public int evaluate(Move m, Board b) {
-//		int redScore, blackScore, score;
-//		redScore = 4*(b.getRedPieces().size());
-//		redScore += 2*b.getKingCount(Piece.RED);
-//		blackScore = 4*(b.getBlackPieces().size());
-//		blackScore += 2*b.getKingCount(Piece.BLACK);
-//		
-//		if(playerTeam == Piece.RED) {
-//			if(blackScore == 0) {
-//				return Integer.MAX_VALUE;
-//			}
-//			score = (redScore*1024)/blackScore;
-//		} else {
-//			if(redScore == 0) {
-//				return Integer.MAX_VALUE;
-//			}
-//			score = (blackScore*1024)/redScore;
-//		}
-//		if(m.isPromotion()) {
-//			score += 1000;
-//		}
-//		return score;
+		int redScore, blackScore, score;
+		redScore = 4*(b.getRedPieces().size());
+		redScore += 2*b.getKingCount(Piece.RED);
+		blackScore = 4*(b.getBlackPieces().size());
+		blackScore += 2*b.getKingCount(Piece.BLACK);
+		
 		if(playerTeam == Piece.RED) {
-			return b.getRedPieces().size()-b.getBlackPieces().size();
+			if(blackScore == 0) {
+				return Integer.MAX_VALUE;
+			}
+			score = (redScore*1024)/blackScore;
 		} else {
-			return b.getBlackPieces().size()-b.getRedPieces().size();
+			if(redScore == 0) {
+				return Integer.MAX_VALUE;
+			}
+			score = (blackScore*1024)/redScore;
 		}
+		if(m.isPromotion()) {
+			score += 1000;
+		}
+		return score;
+//		if(playerTeam == Piece.RED) {
+//			return b.getRedPieces().size()-b.getBlackPieces().size();
+//		} else {
+//			return b.getBlackPieces().size()-b.getRedPieces().size();
+//		}
 	}
 	
 	public int getTeam() {

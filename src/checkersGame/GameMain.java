@@ -7,15 +7,15 @@ import ai.*;
 
 public class GameMain {
 	
-	static Board b = new Board(3);
+	static Board b = new Board(1);
 	
 	//Run from terminal: java checkersGame.GameMain
 	public static void main(String[] args) {
 		
-		//loadBoard("moveTest.txt", b);
-		b.defaultStart();
+		loadBoard("moveTest.txt", b);
+		//b.defaultStart();
 		
-		Player p1 = new AlphabetAI(Piece.BLACK);
+		Player p1 = new HumanPlayer(Piece.BLACK);
 		Player p2 = new AggressiveAI(Piece.RED);
 		
 		ArrayList<Move> blackMoves, redMoves;
@@ -41,7 +41,7 @@ public class GameMain {
 			
 			redMoves = b.getValidMovesSingleThread(Piece.RED);
 			if(redMoves.size() == 0) {
-				System.out.println("RED out of moves... GREEN wins");
+				System.out.println("RED out of moves... BLUE wins");
 				break;
 			}
 			m = p2.selectMove(redMoves, b);
