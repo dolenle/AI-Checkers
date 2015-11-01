@@ -7,51 +7,58 @@ import ai.*;
 
 public class GameMain {
 	
-	static Board b = new Board(1);
+	static Board b = new Board(3);
+	
+	static boolean blackTurn = false;
 	
 	//Run from terminal: java checkersGame.GameMain
 	public static void main(String[] args) {
 		
-		loadBoard("moveTest.txt", b);
-		//b.defaultStart();
+		//loadBoard("test.txt", b);
+		b.defaultStart();
 		
-		Player p1 = new HumanPlayer(Piece.BLACK);
-		Player p2 = new AggressiveAI(Piece.RED);
+		Player p1 = new OkayAI(Piece.BLACK);
+		Player p2 = new MultiThreadAI(Piece.RED);
 		
 		ArrayList<Move> blackMoves, redMoves;
 		
+		b.printBoard();
+		
 		while(true) {
-			b.printBoard();
-			blackMoves = b.getValidMovesSingleThread(Piece.BLACK);
-			if(blackMoves.size() == 0) {
-				System.out.println("GREEN out of moves... RED wins");
-				break;
+			if(blackTurn) {
+				blackMoves = b.getValidMovesSingleThread(Piece.BLACK);
+				if(blackMoves.size() == 0) {
+					System.out.println("GREEN out of moves... RED wins");
+					break;
+				}
+				Move m = p1.selectMove(blackMoves, b);
+				System.out.print("GREEN plays ("+m.getPiece().getX()+","+m.getPiece().getY()+")");
+				for(Step s : m.getSteps()) {
+					System.out.print("->("+s.getX()+","+s.getY()+")");
+				}
+				System.out.println();
+				b.applyMove(m);
+				b.markMove(m);
+				b.printBoard();
+				b.isConsistent();
+			} else {
+				redMoves = b.getValidMovesSingleThread(Piece.RED);
+				if(redMoves.size() == 0) {
+					System.out.println("RED out of moves... GREEN wins");
+					break;
+				}
+				Move m = p2.selectMove(redMoves, b);
+				System.out.print("RED plays ("+m.getPiece().getX()+","+m.getPiece().getY()+")");
+				for(Step s : m.getSteps()) {
+					System.out.print("->("+s.getX()+","+s.getY()+")");
+				}
+				System.out.println();
+				b.applyMove(m);
+				b.markMove(m);
+				b.printBoard();
+				b.isConsistent();
 			}
-			Move m = p1.selectMove(blackMoves, b);
-			System.out.print("GREEN plays ("+m.getPiece().getX()+","+m.getPiece().getY()+")");
-			for(Step s : m.getSteps()) {
-				System.out.print("->("+s.getX()+","+s.getY()+")");
-			}
-			System.out.println();
-			b.applyMove(m);
-			b.markMove(m);
-			b.printBoard();
-			
-			b.isConsistent();
-			
-			redMoves = b.getValidMovesSingleThread(Piece.RED);
-			if(redMoves.size() == 0) {
-				System.out.println("RED out of moves... BLUE wins");
-				break;
-			}
-			m = p2.selectMove(redMoves, b);
-			System.out.print("RED plays ("+m.getPiece().getX()+","+m.getPiece().getY()+")");
-			for(Step s : m.getSteps()) {
-				System.out.print("->("+s.getX()+","+s.getY()+")");
-			}
-			System.out.println();
-			b.applyMove(m);
-			b.markMove(m);
+			blackTurn = !blackTurn;
 		}
 		b.printBoard();
 	}

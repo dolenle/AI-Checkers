@@ -2,6 +2,7 @@ package checkersGame;
 
 import java.util.ArrayList;
 import java.util.ArrayDeque;
+import java.util.HashMap;
 import java.util.concurrent.*;
 
 public class Board {
@@ -13,14 +14,14 @@ public class Board {
 	private String wht = "\u001B[47m  " + "\u001B[0m";
 	private String end =  "\u001B[0m";
 	
-	private String[] colors = {"\u001B[1m\u001B[31m", null, "\u001B[1m\u001B[34m"}; //34 blue, 32 green
+	private String[] colors = {"\u001B[1m\u001B[31m", null, "\u001B[1m\u001B[32m"}; //34 blue, 32 green
 	private static final String UTFLargeDot = "\u2B24 ";
 	
 	private String blank = "  ";
 	
 	private Piece[] pieceLocs = new Piece[64];
-	private ArrayList<Piece> redPieces = new ArrayList<Piece>();
-	private ArrayList<Piece> blackPieces = new ArrayList<Piece>();
+	private HashMap<Integer, Piece> redPieces = new HashMap<Integer, Piece>(20);
+	private HashMap<Integer, Piece> blackPieces = new HashMap<Integer, Piece>(20);
 	
 	private int kingCount[] = {0, 0, 0};
 	
@@ -96,16 +97,16 @@ public class Board {
 		Board b = new Board(size);
 		Piece[] newLocs = new Piece[64];
 		b.setLocs(newLocs);
-		ArrayList<Piece> blackCopy = new ArrayList<Piece>(blackPieces.size());
-		ArrayList<Piece> redCopy = new ArrayList<Piece>(redPieces.size());
-		for(Piece bPiece : blackPieces) {
+		HashMap<Integer, Piece> blackCopy = new HashMap<Integer, Piece>(20);
+		HashMap<Integer, Piece> redCopy = new HashMap<Integer, Piece>(20);
+		for(Piece bPiece : blackPieces.values()) {
 			Piece newB = new Piece(bPiece);
-			blackCopy.add(newB);
+			blackCopy.put(newB.getID(), newB);
 			newLocs[bPiece.getY()*8 + bPiece.getX()] = newB;
 		}
-		for(Piece rPiece : redPieces) {
+		for(Piece rPiece : redPieces.values()) {
 			Piece newR = new Piece(rPiece);
-			redCopy.add(newR);
+			redCopy.put(newR.getID(), newR);
 			newLocs[rPiece.getY()*8 + rPiece.getX()] = newR;
 		}
 		b.setPieces(blackCopy, redCopy);
@@ -130,9 +131,9 @@ public class Board {
 	 		Piece p = new Piece(team, x, y);
 			pieceLocs[y*8 + x] = p;
 			if(team == Piece.BLACK) {
-				blackPieces.add(p);
+				blackPieces.put(p.getID(), p);
 			} else {
-				redPieces.add(p);
+				redPieces.put(p.getID(), p);
 			}
 			return p;
 		} else {
@@ -152,7 +153,7 @@ public class Board {
 	
 	//HAS BUG. DO NOT USE. DEPRECATED?
 	public ArrayList<Move> getValidMoves(int team, int threads) {
-		ArrayList<Piece> playerPieces;
+		HashMap<Integer, Piece> playerPieces;
 		if(team == Piece.BLACK) {
 			playerPieces = blackPieces;
 		} else {
@@ -161,7 +162,7 @@ public class Board {
 		ExecutorService deadPool = Executors.newFixedThreadPool(threads);
 		ArrayList<Move> validMoves = new ArrayList<Move>();
 		ArrayList<Future<ArrayDeque<Move>>> results = new ArrayList<Future<ArrayDeque<Move>>>();
-		for(Piece p : playerPieces) {
+		for(Piece p : playerPieces.values()) {
 			results.add(deadPool.submit(new MoveWorker(p, pieceLocs, false)));
 		}
 		for(Future<ArrayDeque<Move>> r : results) {
@@ -176,14 +177,14 @@ public class Board {
 	}
 	
 	public ArrayList<Move> getValidMovesSingleThread(int team) {
-		ArrayList<Piece> playerPieces = redPieces;
+		HashMap<Integer, Piece> playerPieces = redPieces;
 		if(team == Piece.BLACK) {
 			playerPieces = blackPieces;
 		}
 		ArrayList<Move> allMoves = new ArrayList<Move>();
 		ArrayList<Move> jumpMoves = new ArrayList<Move>();
 		boolean capture = false;
-		for(Piece p : playerPieces) {
+		for(Piece p : playerPieces.values()) {
 			MoveWorker moveFinder = new MoveWorker(p, pieceLocs, capture);
 			ArrayDeque<Move> result = moveFinder.call();
 			if(result != null) {
@@ -212,7 +213,7 @@ public class Board {
 		p.moveTo(s.getX(), s.getY());
 		pieceLocs[s.getY()*8 + s.getX()] = p;
 		
-		ArrayList<Piece> opponent;
+		HashMap<Integer, Piece> opponent;
 		if(team == Piece.BLACK) {
 			opponent = redPieces;
 		} else {
@@ -220,7 +221,7 @@ public class Board {
 		}
 		for(Piece cp : m.getCaptures()) {
 			pieceLocs[cp.getY()*8 + cp.getX()] = null;
-			opponent.remove(cp);
+			opponent.remove(cp.getID());
 			if(cp.isKing()) {
 				kingCount[-team+1]--;
 			}
@@ -235,7 +236,7 @@ public class Board {
 	public Board undoMove(Move m) {
 		Piece p = m.getPiece();
 		int team = p.getTeam();
-		ArrayList<Piece> opponent;
+		HashMap<Integer, Piece> opponent;
 		if(team == Piece.BLACK) {
 			opponent = redPieces;
 		} else {
@@ -243,7 +244,7 @@ public class Board {
 		}
 		for(Piece cp : m.getCaptures()) {
 			pieceLocs[cp.getY()*8 + cp.getX()] = cp;
-			opponent.add(cp);
+			opponent.put(cp.getID(), cp);
 			if(cp.isKing()) {
 				kingCount[-team+1]++;
 			}
@@ -263,14 +264,14 @@ public class Board {
 	 */
 	public ArrayList<Piece> applyAnonymousMove(Move m) {
 		ArrayList<Piece> captures = new ArrayList<Piece>();
-		Piece p = pieceLocs[m.getPiece().getY()*8 + m.getPiece().getX()];
+		Piece p = pieceLocs[m.getStartY()*8 + m.getStartX()];
 		int team = p.getTeam();
 		Step s = m.getSteps().peekLast();
 		pieceLocs[p.getY()*8 + p.getX()] = null;
 		p.moveTo(s.getX(), s.getY());
 		pieceLocs[s.getY()*8 + s.getX()] = p;
 		
-		ArrayList<Piece> opponent;
+		HashMap<Integer, Piece> opponent;
 		if(team == Piece.BLACK) {
 			opponent = redPieces;
 		} else {
@@ -279,7 +280,7 @@ public class Board {
 		for(Piece cp : m.getCaptures()) {
 			Piece captured = pieceLocs[cp.getY()*8 + cp.getX()];
 			pieceLocs[cp.getY()*8 + cp.getX()] = null;
-			opponent.remove(captured);
+			opponent.remove(captured.getID());
 			captures.add(captured);
 			if(captured.isKing()) {
 				kingCount[-team+1]--;
@@ -296,7 +297,7 @@ public class Board {
 		Step s = m.getSteps().peekLast();
 		Piece p = pieceLocs[s.getY()*8 + s.getX()];
 		int team = p.getTeam();
-		ArrayList<Piece> opponent;
+		HashMap<Integer, Piece> opponent;
 		if(team == Piece.BLACK) {
 			opponent = redPieces;
 		} else {
@@ -304,7 +305,7 @@ public class Board {
 		}
 		for(Piece cp :captures) {
 			pieceLocs[cp.getY()*8 + cp.getX()] = cp;
-			opponent.add(cp);
+			opponent.put(cp.getID(), cp);
 			if(cp.isKing()) {
 				kingCount[-team+1]++;
 			}
@@ -333,16 +334,16 @@ public class Board {
 		pieceLocs = locs;
 	}
 	
-	private void setPieces(ArrayList<Piece> black, ArrayList<Piece> red) {
+	private void setPieces(HashMap<Integer, Piece> black, HashMap<Integer, Piece> red) {
 		blackPieces = black;
 		redPieces = red;
 	}
 	
-	public ArrayList<Piece> getBlackPieces() {
+	public HashMap<Integer, Piece> getBlackPieces() {
 		return blackPieces;
 	}
 	
-	public ArrayList<Piece> getRedPieces() {
+	public HashMap<Integer, Piece> getRedPieces() {
 		return redPieces;
 	}
 	
@@ -369,7 +370,7 @@ public class Board {
 					if(p.isKing()) {
 						blackKings++;
 					}
-					if(!blackPieces.contains(p)) {
+					if(!blackPieces.containsKey(p.getID())) {
 						System.out.println("Black Piece not in list");
 						status = false;
 					}
@@ -378,7 +379,7 @@ public class Board {
 					if(p.isKing()) {
 						redKings++;
 					}
-					if(!redPieces.contains(p)) {
+					if(!redPieces.containsKey(p.getID())) {
 						System.out.println("Red Piece not in list");
 						status = false;
 					}

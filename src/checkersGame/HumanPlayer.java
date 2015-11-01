@@ -42,8 +42,14 @@ public class HumanPlayer implements Player {
 				sel = input.nextInt();
 			} catch (Exception e) {
 				try {
-					if(input.nextLine().charAt(0) == 'h') {
-						getHelp(validMoves, b);
+					String line = input.nextLine();
+					if(line.charAt(0) == 'h') {
+						if(line.length() > 1 && Character.getNumericValue(line.charAt(1)) >= 0) {
+							getHelp(validMoves, b, Character.getNumericValue(line.charAt(1)));
+						} else {
+							getHelp(validMoves, b, -1);
+						}
+						
 						continue;
 					}
 				} catch (Exception e2) {
@@ -60,13 +66,16 @@ public class HumanPlayer implements Player {
 		return team;
 	}
 	
-	private void getHelp(ArrayList<Move> validMoves, Board b) {
+	private void getHelp(ArrayList<Move> validMoves, Board b, int sel) {
 		System.out.println("Asking an AI for help...");
 		Random rand = new Random();
-		int x = rand.nextInt(6);
+		int x = sel;
+		if(sel == -1) {
+			x = rand.nextInt(6);
+		}
 		String aiName=null, thinkText=null, resultText=null, prologue=null;
 		Player ai = null;
-		switch(5) {
+		switch(x) {
 		case 0:
 			aiName = "RandomAI";
 			thinkText = "Huh? You need help?... Um.... sure, I guess.";
@@ -93,7 +102,7 @@ public class HumanPlayer implements Player {
 			thinkText = "I'll have my team of highly trained monkeys work on your question ASAP.";
 			resultText = "My team of monkeys has reached a conclusion. You should play";
 			prologue = ". Good luck.";
-			ai = new MultiThreadAI(team, 5);
+			ai = new MultiThreadAI(team, 50, true);
 			break;
 		case 4:
 			aiName = "AlphabetAI";
@@ -109,6 +118,16 @@ public class HumanPlayer implements Player {
 			prologue = ".";
 			ai = new AggressiveAI(team, 5);
 			break;
+		case 6:
+			aiName = "MultiThreadAI";
+			thinkText = "I'll have my team of highly trained monkeys work on your question ASAP.";
+			resultText = "My team of monkeys has reached a conclusion. You should play";
+			prologue = ". Good luck.";
+			ai = new MultiThreadAI(team, 50, false);
+			break;
+		default:
+			System.out.println("Invalid option");
+			return;
 		}
 		System.out.println(aiName+" says: \""+thinkText+"\"");
 		Move help = ai.selectMove(validMoves, b);

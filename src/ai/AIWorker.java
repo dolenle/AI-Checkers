@@ -13,7 +13,7 @@ public class AIWorker implements Callable<Integer> {
 	private int maxDepth;
 	private Board initialBoard;
 	private Move initialMove;
-	
+		
 	public AIWorker(int team, int maxDepth, Board initialBoard, Move initialMove) {
 		playerTeam = team;
 		this.maxDepth = maxDepth;
@@ -22,10 +22,10 @@ public class AIWorker implements Callable<Integer> {
 	}
 	
 	public Integer call() {
-		return new Integer(search(maxDepth, initialMove, initialBoard.clone(), playerTeam));
+		return new Integer(search(maxDepth, initialMove, initialBoard.clone(), playerTeam, Integer.MIN_VALUE, Integer.MAX_VALUE));
 	}
 	
-	private int search(int depth, Move m, Board b, int team) {
+	private int search(int depth, Move m, Board b, int team, int alpha, int beta) {
 		if(depth == 0) {
 			ArrayList<Piece> cap = b.applyAnonymousMove(m);
 			int score = evaluate(m, b);
@@ -44,9 +44,15 @@ public class AIWorker implements Callable<Integer> {
 				return Integer.MAX_VALUE;
 			}
 			for(Move next : branches) {
-				int score = search(depth-1, next, b, -team);
+				int score = search(depth-1, next, b, -team, alpha, beta);
 				if(score > value) {
 					value = score;
+				}
+				if(value > alpha) {
+					alpha = value;
+				}
+				if(beta <= alpha) {
+					break;
 				}
 			}
 		} else {
@@ -56,9 +62,15 @@ public class AIWorker implements Callable<Integer> {
 				return Integer.MIN_VALUE;
 			}
 			for(Move next : branches) {
-				int score = search(depth-1, next, b, -team);
+				int score = search(depth-1, next, b, -team, alpha, beta);
 				if(score < value) {
 					value = score;
+				}
+				if(value < score) {
+					beta = value;
+				}
+				if(beta <= alpha) {
+					break;
 				}
 			}
 		}
@@ -67,10 +79,13 @@ public class AIWorker implements Callable<Integer> {
 	}
 	
 	public int evaluate(Move m, Board b) {
+		int score;
 		if(playerTeam == Piece.RED) {
-			return b.getRedPieces().size()-b.getBlackPieces().size()+(m.getCaptures().size()*m.getPiece().getTeam()*playerTeam);
+			score = 3*(b.getRedPieces().size()-b.getBlackPieces().size());
 		} else {
-			return b.getBlackPieces().size()-b.getRedPieces().size()+(m.getCaptures().size()*m.getPiece().getTeam()*playerTeam);
+			score = 3*(b.getBlackPieces().size()-b.getRedPieces().size());
 		}
+		score += 2*(b.getKingCount(playerTeam)-b.getKingCount(-playerTeam));
+		return score;
 	}
 }

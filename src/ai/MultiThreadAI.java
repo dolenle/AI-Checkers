@@ -6,13 +6,15 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import checkersGame.Board;
 import checkersGame.Move;
 import checkersGame.Player;
 
 /**
- * A feeble attempt at making a multithreaded version of OkayAI
+ * A feeble attempt at making a multithreaded AI
  * At least it works well as a CPU warmer
  */
 
@@ -21,6 +23,10 @@ public class MultiThreadAI implements Player {
 	private int playerTeam;
 	private Scanner input = new Scanner(System.in);
 	private Random rand = new Random();
+	
+	private long stopTime;
+	
+	boolean ab = true;
 			
 	public MultiThreadAI(int team) {
 		playerTeam = team;
@@ -36,9 +42,10 @@ public class MultiThreadAI implements Player {
 		timeLimit = ((long) seconds)*1000000000;
 	}
 	
-	public MultiThreadAI(int team, int time) {
+	public MultiThreadAI(int team, int time, boolean ab) {
 		playerTeam = team;
 		timeLimit = ((long) time)*1000000000;
+		this.ab = ab;
 	}
 	
 	public Move selectMove(ArrayList<Move> validMoves, Board b) {
@@ -47,32 +54,49 @@ public class MultiThreadAI implements Player {
 		}
 		ExecutorService deadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 		int depth = 1;
-		long start = System.nanoTime();
+		long startTime = System.nanoTime();
+		stopTime = startTime+timeLimit;
 		Move bestMove = validMoves.get(0);
-		while(System.nanoTime() - start < timeLimit) {
+		Move lastBest = bestMove;
+		int best = Integer.MIN_VALUE;
+		
+		while(best < Integer.MAX_VALUE) {
 			ArrayList<Future<Integer>> results = new ArrayList<Future<Integer>>();
-			int best = Integer.MIN_VALUE;
+			best = Integer.MIN_VALUE;
+			lastBest = bestMove;
+			long lastTime = System.nanoTime();
 			for(Move m : validMoves) {
 				AIWorker worker = new AIWorker(playerTeam, depth, b, m);
 				results.add(deadPool.submit(worker));
 			}
 			int i = 0;
+			int randCount = 1;
+			System.out.println("Depth"+depth);
 			for(Future<Integer> r : results) {
 				try {
-					int score = r.get();
-					if(score > best || score == best && rand.nextBoolean()) {
+					int score = r.get(stopTime-System.nanoTime(), TimeUnit.NANOSECONDS);
+					if(score > best) {
 						best = score;
 						bestMove = validMoves.get(i);
-						i++;
+						randCount = 1;
+					} else if(score == best && rand.nextInt(++randCount) == 0) {
+						bestMove = validMoves.get(i);
 					}
+					i++;
+					System.out.println("Move "+i+": "+score);
+				} catch (TimeoutException te) {
+					System.out.println("Search time limit reached. Reverting to depth "+--depth);
+					System.out.println("Reached depth "+depth+" in "+(lastTime - startTime)/1000000000.0+"s");
+					deadPool.shutdownNow();
+					return lastBest;
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 			depth++;
 		}
-		long elapsed = System.nanoTime() - start;
-		System.out.println("Reached depth "+depth+" in "+elapsed/1000000000.0+"s");
+		
+		System.out.println("Reached depth "+(depth-1)+" in "+(System.nanoTime() - startTime)/1000000000.0+"s");
 		deadPool.shutdown();
 		return bestMove;
 		

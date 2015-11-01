@@ -1,6 +1,7 @@
 package ai;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
@@ -169,7 +170,7 @@ public class AggressiveAI implements Player {
 	//heuristic
 	public int evaluate(Move m, Board b) {
 		int score;
-		ArrayList<Piece> myPieces, opponentPieces;
+		HashMap<Integer, Piece> myPieces, opponentPieces;
 		if(playerTeam == Piece.RED) {
 			myPieces = b.getRedPieces();
 			opponentPieces = b.getBlackPieces();
@@ -179,17 +180,14 @@ public class AggressiveAI implements Player {
 		}
 		score = (myPieces.size()-opponentPieces.size())*2097152;
 		score += (b.getKingCount(playerTeam) - b.getKingCount(-playerTeam))*1024;
-		//score += m.getCaptures().size()*m.getPiece().getTeam()*playerTeam;
-		if(m.getPiece().isKing()) {
-			score += 4096*m.getCaptures().size()*m.getTeam()*playerTeam;
-		}
-		for(Piece p : myPieces) {
+		score += m.getCaptures().size()*m.getPiece().getTeam()*playerTeam;
+		for(Piece p : myPieces.values()) {
 			score += 64*aggressiveWeights[p.getY()*8+p.getX()];
 			if(p.isKing()) {
 				score += 16*aggressiveWeights[p.getY()*8+p.getX()];
 			}
 			if(opponentPieces.size() <= 5) {
-				for(Piece o : opponentPieces) {
+				for(Piece o : opponentPieces.values()) {
 					score += 512/(Math.abs(p.getX()-o.getX())+Math.abs(p.getY()-o.getY()));
 				}
 			}
