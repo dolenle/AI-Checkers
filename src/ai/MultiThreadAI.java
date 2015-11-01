@@ -25,8 +25,6 @@ public class MultiThreadAI implements Player {
 	private Random rand = new Random();
 	
 	private long stopTime;
-	
-	boolean ab = true;
 			
 	public MultiThreadAI(int team) {
 		playerTeam = team;
@@ -38,14 +36,13 @@ public class MultiThreadAI implements Player {
 			} catch (Exception e) {
 				input.next();
 			}
-		} while(seconds < 0);
+		} while(seconds <= 0);
 		timeLimit = ((long) seconds)*1000000000;
 	}
 	
-	public MultiThreadAI(int team, int time, boolean ab) {
+	public MultiThreadAI(int team, int time) {
 		playerTeam = team;
 		timeLimit = ((long) time)*1000000000;
-		this.ab = ab;
 	}
 	
 	public Move selectMove(ArrayList<Move> validMoves, Board b) {
@@ -71,7 +68,6 @@ public class MultiThreadAI implements Player {
 			}
 			int i = 0;
 			int randCount = 1;
-			System.out.println("Depth"+depth);
 			for(Future<Integer> r : results) {
 				try {
 					int score = r.get(stopTime-System.nanoTime(), TimeUnit.NANOSECONDS);
@@ -83,7 +79,6 @@ public class MultiThreadAI implements Player {
 						bestMove = validMoves.get(i);
 					}
 					i++;
-					System.out.println("Move "+i+": "+score);
 				} catch (TimeoutException te) {
 					System.out.println("Search time limit reached. Reverting to depth "+--depth);
 					System.out.println("Reached depth "+depth+" in "+(lastTime - startTime)/1000000000.0+"s");

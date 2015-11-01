@@ -28,7 +28,7 @@ public class OkayAI implements Player {
 			} catch (Exception e) {
 				input.next();
 			}
-		} while(seconds < 0);
+		} while(seconds <= 0);
 		timeLimit = ((long) seconds)*1000000000;
 	}
 	
@@ -130,9 +130,9 @@ public class OkayAI implements Player {
 	//heuristic
 	public int evaluate(Move m, Board b) {
 //		int redScore, blackScore, score;
-//		redScore = 4*(b.getRedPieces().size());
+//		redScore = 3*(b.getRedPieces().size());
 //		redScore += 2*b.getKingCount(Piece.RED);
-//		blackScore = 4*(b.getBlackPieces().size());
+//		blackScore = 3*(b.getBlackPieces().size());
 //		blackScore += 2*b.getKingCount(Piece.BLACK);
 //		
 //		if(playerTeam == Piece.RED) {

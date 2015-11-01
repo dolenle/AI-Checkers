@@ -43,7 +43,7 @@ public class Board {
 		for(int i=0; i<cols; i++) {
 			if(i%size == thresh1) {
 				System.out.print(' ');
-				System.out.print(i/size);
+				System.out.print("\u001B[1m"+i/size);
 			} else {
 				System.out.print("  ");
 			}
@@ -51,7 +51,7 @@ public class Board {
 		System.out.println();
 		for(int j=0; j<cols; j++) {
 			if(j%size == thresh1) {
-				System.out.print(j/size);
+				System.out.print("\u001B[1m"+j/size+end);
 			} else {
 				System.out.print(' ');
 			}
@@ -89,8 +89,22 @@ public class Board {
 					System.out.print(wht);
 				}
 			}
+			if(j%size == thresh1) {
+				System.out.print("\u001B[1m"+j/size+end);
+			} else {
+				System.out.print(' ');
+			}
 			System.out.println();
 		}
+		for(int i=0; i<cols; i++) {
+			if(i%size == thresh1) {
+				System.out.print(' ');
+				System.out.print("\u001B[1m"+i/size+end);
+			} else {
+				System.out.print("  ");
+			}
+		}
+		System.out.println();
 	}
 	
 	public Board clone() { //what a terrible terrible thing

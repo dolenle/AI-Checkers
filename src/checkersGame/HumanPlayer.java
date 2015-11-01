@@ -93,7 +93,7 @@ public class HumanPlayer implements Player {
 		case 2:
 			aiName = "OkayAI";
 			thinkText = "Okay, I'll have a look at the board.";
-			resultText = "Okay, if it were up to me, I would choose";
+			resultText = "Okay, I think you should choose";
 			prologue = ". Does that sound okay to you?";
 			ai = new OkayAI(team, 5);
 			break;
@@ -102,7 +102,7 @@ public class HumanPlayer implements Player {
 			thinkText = "I'll have my team of highly trained monkeys work on your question ASAP.";
 			resultText = "My team of monkeys has reached a conclusion. You should play";
 			prologue = ". Good luck.";
-			ai = new MultiThreadAI(team, 50, true);
+			ai = new MultiThreadAI(team, 5);
 			break;
 		case 4:
 			aiName = "AlphabetAI";
@@ -113,17 +113,10 @@ public class HumanPlayer implements Player {
 			break;
 		case 5:
 			aiName = "AggressiveAI";
-			thinkText = "I am thinking";
-			resultText = "I choose";
-			prologue = ".";
+			thinkText = "You talking to me? Well I'm the only one here... You talkin' to me?";
+			resultText = "I'm standin' here. You make the move. It's your move:";
+			prologue = ". Yeah? You like that? Huh?";
 			ai = new AggressiveAI(team, 5);
-			break;
-		case 6:
-			aiName = "MultiThreadAI";
-			thinkText = "I'll have my team of highly trained monkeys work on your question ASAP.";
-			resultText = "My team of monkeys has reached a conclusion. You should play";
-			prologue = ". Good luck.";
-			ai = new MultiThreadAI(team, 50, false);
 			break;
 		default:
 			System.out.println("Invalid option");

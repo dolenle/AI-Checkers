@@ -19,14 +19,14 @@ public class AggressiveAI implements Player {
 	
 	private long stopTime;
 	
-	private int[] aggressiveWeights = {	0, 0, 0, 0, 0, 0, 0, 0,
+	private int[] aggressiveWeights = {	1, 0, 0, 0, 0, 0, 0, 1,
 										0, 1, 1, 1, 1, 1, 1, 0,
 										0, 1, 2, 4, 4, 2, 1, 0,
 										2, 4, 8, 8, 8, 8, 4, 2,
 										2, 4, 8, 8, 8, 8, 4, 2,
 										0, 1, 2, 4, 4, 2, 1, 0,
 										0, 1, 1, 1, 1, 1, 1, 0,
-										0, 0, 0, 0, 0, 0, 0, 0 };
+										1, 0, 0, 0, 0, 0, 0, 1 };
 	
 	public AggressiveAI(int team, int time) {
 		playerTeam = team;
@@ -56,7 +56,7 @@ public class AggressiveAI implements Player {
 			} catch (Exception e) {
 				input.next();
 			}
-		} while(seconds < 0);
+		} while(seconds <= 0);
 		timeLimit = ((long) seconds)*1000000000;
 	}
 	
@@ -179,17 +179,19 @@ public class AggressiveAI implements Player {
 			myPieces = b.getBlackPieces();
 		}
 		score = (myPieces.size()-opponentPieces.size())*2097152;
-		score += (b.getKingCount(playerTeam) - b.getKingCount(-playerTeam))*1024;
+		score += (b.getKingCount(playerTeam) - b.getKingCount(-playerTeam))*2048;
 		score += m.getCaptures().size()*m.getPiece().getTeam()*playerTeam;
 		for(Piece p : myPieces.values()) {
 			score += 64*aggressiveWeights[p.getY()*8+p.getX()];
 			if(p.isKing()) {
 				score += 16*aggressiveWeights[p.getY()*8+p.getX()];
 			}
-			if(opponentPieces.size() <= 5) {
+			if(opponentPieces.size() < myPieces.size() - 2) {
 				for(Piece o : opponentPieces.values()) {
-					score += 512/(Math.abs(p.getX()-o.getX())+Math.abs(p.getY()-o.getY()));
+					score += (Math.abs(p.getX()-o.getX())+Math.abs(p.getY()-o.getY()));
 				}
+			} else if(p.getX()%7 == 0 || p.getY()%7 == 0) {
+				score += 512;
 			}
 		}
 		return score;

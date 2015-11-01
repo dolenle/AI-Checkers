@@ -28,7 +28,7 @@ public class AlphabetAI implements Player {
 			} catch (Exception e) {
 				input.next();
 			}
-		} while(seconds < 0);
+		} while(seconds <= 0);
 		timeLimit = ((long) seconds)*1000000000;
 	}
 	
@@ -147,32 +147,14 @@ public class AlphabetAI implements Player {
 	
 	//heuristic
 	public int evaluate(Move m, Board b) {
-		int redScore, blackScore, score;
-		redScore = 4*(b.getRedPieces().size());
-		redScore += 2*b.getKingCount(Piece.RED);
-		blackScore = 4*(b.getBlackPieces().size());
-		blackScore += 2*b.getKingCount(Piece.BLACK);
-		
+		int score;
 		if(playerTeam == Piece.RED) {
-			if(blackScore == 0) {
-				return Integer.MAX_VALUE;
-			}
-			score = (redScore*1024)/blackScore;
+			score = 3*(b.getRedPieces().size()-b.getBlackPieces().size());
 		} else {
-			if(redScore == 0) {
-				return Integer.MAX_VALUE;
-			}
-			score = (blackScore*1024)/redScore;
+			score = 3*(b.getBlackPieces().size()-b.getRedPieces().size());
 		}
-		if(m.isPromotion()) {
-			score += 1000;
-		}
+		score += 2*(b.getKingCount(playerTeam)-b.getKingCount(-playerTeam));
 		return score;
-//		if(playerTeam == Piece.RED) {
-//			return b.getRedPieces().size()-b.getBlackPieces().size();
-//		} else {
-//			return b.getBlackPieces().size()-b.getRedPieces().size();
-//		}
 	}
 	
 	public int getTeam() {
