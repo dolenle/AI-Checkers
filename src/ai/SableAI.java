@@ -10,7 +10,6 @@ import checkersGame.Board;
 import checkersGame.Move;
 import checkersGame.Piece;
 import checkersGame.Player;
-import checkersGame.Step;
 
 public class SableAI implements Player {
 	private long timeLimit;
@@ -170,6 +169,7 @@ public class SableAI implements Player {
 	public int evaluate(Move m, Board b) {
 		LinkedHashMap<Integer, Piece> myPieces, opponentPieces;
 		int myPieceCount, opponentPieceCount;
+//		int myAvgX=0, myAvgY=0, opAvgX=0, opAvgY=0;
 		if(playerTeam == Piece.RED) {
 			myPieces = b.getRedPieces();
 			opponentPieces = b.getBlackPieces();
@@ -179,6 +179,11 @@ public class SableAI implements Player {
 		}
 		myPieceCount = myPieces.size();
 		opponentPieceCount = opponentPieces.size();
+		if(opponentPieceCount == 0) {
+			return Integer.MAX_VALUE;
+		} else if(myPieceCount == 0) {
+			return Integer.MIN_VALUE;
+		}
 		
 		int score = (3*(myPieceCount-opponentPieceCount)+2*(b.getKingCount(playerTeam)-b.getKingCount(-playerTeam)))*2097152; //base value
 		for(Piece p : myPieces.values()) {
@@ -187,6 +192,8 @@ public class SableAI implements Player {
 			} else {
 				score += kingWeights[p.getY()*8+p.getX()];
 			}
+//			myAvgX+=p.getX();
+//			myAvgY+=p.getY();
 		}
 		for(Piece p : opponentPieces.values()) {
 			if(!p.isKing()) {
@@ -194,12 +201,20 @@ public class SableAI implements Player {
 			} else {
 				score -= kingWeights[p.getY()*8+p.getX()];
 			}
+//			opAvgX+=p.getX();
+//			opAvgY+=p.getY();
 		}
 		if(myPieceCount > opponentPieceCount) {
-			score += 2048*24/(myPieceCount+opponentPieceCount);
+			score += 4096*24/(myPieceCount+opponentPieceCount);
 		} else if(myPieceCount < opponentPieceCount) {
-			score -= 2048*24/(myPieceCount+opponentPieceCount);
+			score -= 4096*24/(myPieceCount+opponentPieceCount);
 		}
+//		myAvgX /= myPieceCount;
+//		myAvgY /= myPieceCount;
+//		opAvgX /= opponentPieceCount;
+//		opAvgY /= opponentPieceCount;
+		
+//		score += 1024*((7-Math.abs(myAvgX-opAvgX))+(7-Math.abs(myAvgY-opAvgY)))*playerTeam*m.getTeam(); //prefer pieces closer
 		
 		return score;
 	}
