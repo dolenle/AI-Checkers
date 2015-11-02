@@ -134,7 +134,7 @@ public class AggressiveAI implements Player {
 					if(score > value) {
 						alpha = value = score;
 					}
-					if(beta < value) {
+					if(value > beta) {
 						break;
 					}
 				} catch (TimeoutException te) {

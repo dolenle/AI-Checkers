@@ -110,14 +110,14 @@ public class AlphabetAI implements Player {
 				try {
 					int score = search(depth-1, next, b, -team, alpha, beta);
 					if(score > value) {
-						alpha = value = score;
+						value = score;
 					}
-					if(value > beta) {
+					if(value > alpha) {
+						alpha = value;
+					}
+					if(beta <= alpha) {
 						break;
 					}
-//					if(beta <= alpha) {
-//						break;
-//					}
 				} catch (TimeoutException te) {
 					b.undoMove(m);
 					throw te;
@@ -133,14 +133,14 @@ public class AlphabetAI implements Player {
 				try {
 					int score = search(depth-1, next, b, -team, alpha, beta);
 					if(score < value) {
-						beta = value = score;
+						value = score;
 					}
-					if(value < alpha) {
+					if(value < beta) {
+						beta = value;
+					}
+					if(beta <= alpha) {
 						break;
 					}
-//					if(beta <= alpha) {
-//						break;
-//					}
 				} catch (TimeoutException te) {
 					b.undoMove(m);
 					throw te;
