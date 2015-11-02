@@ -2,7 +2,7 @@ package checkersGame;
 
 import java.util.ArrayList;
 import java.util.ArrayDeque;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.concurrent.*;
 
 public class Board {
@@ -20,8 +20,8 @@ public class Board {
 	private String blank = "  ";
 	
 	private Piece[] pieceLocs = new Piece[64];
-	private HashMap<Integer, Piece> redPieces = new HashMap<Integer, Piece>(20);
-	private HashMap<Integer, Piece> blackPieces = new HashMap<Integer, Piece>(20);
+	private LinkedHashMap<Integer, Piece> redPieces = new LinkedHashMap<Integer, Piece>(20);
+	private LinkedHashMap<Integer, Piece> blackPieces = new LinkedHashMap<Integer, Piece>(20);
 	
 	private int kingCount[] = {0, 0, 0};
 	
@@ -111,8 +111,8 @@ public class Board {
 		Board b = new Board(size);
 		Piece[] newLocs = new Piece[64];
 		b.setLocs(newLocs);
-		HashMap<Integer, Piece> blackCopy = new HashMap<Integer, Piece>(20);
-		HashMap<Integer, Piece> redCopy = new HashMap<Integer, Piece>(20);
+		LinkedHashMap<Integer, Piece> blackCopy = new LinkedHashMap<Integer, Piece>(20);
+		LinkedHashMap<Integer, Piece> redCopy = new LinkedHashMap<Integer, Piece>(20);
 		for(Piece bPiece : blackPieces.values()) {
 			Piece newB = new Piece(bPiece);
 			blackCopy.put(newB.getID(), newB);
@@ -167,7 +167,7 @@ public class Board {
 	
 	//HAS BUG. DO NOT USE. DEPRECATED?
 	public ArrayList<Move> getValidMoves(int team, int threads) {
-		HashMap<Integer, Piece> playerPieces;
+		LinkedHashMap<Integer, Piece> playerPieces;
 		if(team == Piece.BLACK) {
 			playerPieces = blackPieces;
 		} else {
@@ -191,7 +191,7 @@ public class Board {
 	}
 	
 	public ArrayList<Move> getValidMovesSingleThread(int team) {
-		HashMap<Integer, Piece> playerPieces = redPieces;
+		LinkedHashMap<Integer, Piece> playerPieces = redPieces;
 		if(team == Piece.BLACK) {
 			playerPieces = blackPieces;
 		}
@@ -227,7 +227,7 @@ public class Board {
 		p.moveTo(s.getX(), s.getY());
 		pieceLocs[s.getY()*8 + s.getX()] = p;
 		
-		HashMap<Integer, Piece> opponent;
+		LinkedHashMap<Integer, Piece> opponent;
 		if(team == Piece.BLACK) {
 			opponent = redPieces;
 		} else {
@@ -250,7 +250,7 @@ public class Board {
 	public Board undoMove(Move m) {
 		Piece p = m.getPiece();
 		int team = p.getTeam();
-		HashMap<Integer, Piece> opponent;
+		LinkedHashMap<Integer, Piece> opponent;
 		if(team == Piece.BLACK) {
 			opponent = redPieces;
 		} else {
@@ -285,7 +285,7 @@ public class Board {
 		p.moveTo(s.getX(), s.getY());
 		pieceLocs[s.getY()*8 + s.getX()] = p;
 		
-		HashMap<Integer, Piece> opponent;
+		LinkedHashMap<Integer, Piece> opponent;
 		if(team == Piece.BLACK) {
 			opponent = redPieces;
 		} else {
@@ -311,7 +311,7 @@ public class Board {
 		Step s = m.getSteps().peekLast();
 		Piece p = pieceLocs[s.getY()*8 + s.getX()];
 		int team = p.getTeam();
-		HashMap<Integer, Piece> opponent;
+		LinkedHashMap<Integer, Piece> opponent;
 		if(team == Piece.BLACK) {
 			opponent = redPieces;
 		} else {
@@ -348,16 +348,16 @@ public class Board {
 		pieceLocs = locs;
 	}
 	
-	private void setPieces(HashMap<Integer, Piece> black, HashMap<Integer, Piece> red) {
+	private void setPieces(LinkedHashMap<Integer, Piece> black, LinkedHashMap<Integer, Piece> red) {
 		blackPieces = black;
 		redPieces = red;
 	}
 	
-	public HashMap<Integer, Piece> getBlackPieces() {
+	public LinkedHashMap<Integer, Piece> getBlackPieces() {
 		return blackPieces;
 	}
 	
-	public HashMap<Integer, Piece> getRedPieces() {
+	public LinkedHashMap<Integer, Piece> getRedPieces() {
 		return redPieces;
 	}
 	

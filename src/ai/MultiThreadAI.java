@@ -50,7 +50,7 @@ public class MultiThreadAI implements Player {
 			return validMoves.get(0);
 		}
 		ExecutorService deadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-		int depth = 1;
+		int depth = 4;
 		long startTime = System.nanoTime();
 		stopTime = startTime+timeLimit;
 		Move bestMove = validMoves.get(0);

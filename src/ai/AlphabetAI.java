@@ -38,7 +38,7 @@ public class AlphabetAI implements Player {
 	}
 	
 	public Move selectMove(ArrayList<Move> validMoves, Board b) {
-		int depth = 1;
+		int depth = 3;
 		Move bestMove = validMoves.get(0);
 		Move lastBest = bestMove;
 		int best = Integer.MIN_VALUE;
@@ -112,9 +112,12 @@ public class AlphabetAI implements Player {
 					if(score > value) {
 						alpha = value = score;
 					}
-					if(beta < value) {
+					if(value > beta) {
 						break;
 					}
+//					if(beta <= alpha) {
+//						break;
+//					}
 				} catch (TimeoutException te) {
 					b.undoMove(m);
 					throw te;
@@ -135,6 +138,9 @@ public class AlphabetAI implements Player {
 					if(value < alpha) {
 						break;
 					}
+//					if(beta <= alpha) {
+//						break;
+//					}
 				} catch (TimeoutException te) {
 					b.undoMove(m);
 					throw te;

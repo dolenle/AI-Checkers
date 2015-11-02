@@ -10,8 +10,9 @@ import checkersGame.Board;
 import checkersGame.Move;
 import checkersGame.Piece;
 import checkersGame.Player;
+import checkersGame.Step;
 
-public class AggressiveAI implements Player {
+public class SableAI implements Player {
 	private long timeLimit;
 	private int playerTeam;
 	private Scanner input = new Scanner(System.in);
@@ -19,35 +20,20 @@ public class AggressiveAI implements Player {
 	
 	private long stopTime;
 	
-	private int[] aggressiveWeights = {	1, 0, 0, 0, 0, 0, 0, 1,
-										0, 1, 1, 1, 1, 1, 1, 0,
-										0, 1, 2, 4, 4, 2, 1, 0,
-										2, 4, 8, 8, 8, 8, 4, 2,
-										2, 4, 8, 8, 8, 8, 4, 2,
-										0, 1, 2, 4, 4, 2, 1, 0,
-										0, 1, 1, 1, 1, 1, 1, 0,
-										1, 0, 0, 0, 0, 0, 0, 1 };
+	private int opponentHome = 0;
+	private int myHome = 7;
 	
-	public AggressiveAI(int team, int time) {
+	private int[] kingWeights = {	0, 32, 8, 8, 8, 8, 8, 8,
+									32, 4, 0, 0, 0, 0, 4, 8,
+									8, 0, 0, 0, 0, 0, 0, 8,
+									8, 0, 0, 16, 16, 0, 0, 8,
+									8, 0, 0, 16, 16, 0, 0, 8,
+									8, 0, 0, 0, 0, 0, 0, 8,
+									8, 4, 0, 0, 0, 0, 4, 32,
+									8, 8, 8, 8, 8, 8, 32, 0	};
+				
+	public SableAI(int team) {
 		playerTeam = team;
-		timeLimit = ((long) time)*1000000000;
-		int opposite, home;
-		if(team == Piece.RED) {
-			opposite = 0;
-			home = 56;
-		} else {
-			home = 0;
-			opposite = 56;
-		}
-		for(int i=0; i<8; i++) {
-			aggressiveWeights[opposite+i] = 8;
-			aggressiveWeights[opposite+i-team*8]*=4;
-			aggressiveWeights[home+i] = -1;
-		}
-	}
-	
-	public AggressiveAI(int team) {
-		this(team, 1);
 		int seconds = 0;
 		do {
 			System.out.print("Please enter a time limit in seconds: ");
@@ -58,10 +44,23 @@ public class AggressiveAI implements Player {
 			}
 		} while(seconds <= 0);
 		timeLimit = ((long) seconds)*1000000000;
+		if(team == Piece.BLACK) {
+			opponentHome = 7;
+			myHome = 0;
+		}
+	}
+	
+	public SableAI(int team, int time) {
+		playerTeam = team;
+		timeLimit = ((long) time)*1000000000;
+		if(team == Piece.BLACK) {
+			opponentHome = 7;
+			myHome = 0;
+		}
 	}
 	
 	public Move selectMove(ArrayList<Move> validMoves, Board b) {
-		int depth = 3;
+		int depth = 4;
 		Move bestMove = validMoves.get(0);
 		Move lastBest = bestMove;
 		int best = Integer.MIN_VALUE;
@@ -71,8 +70,6 @@ public class AggressiveAI implements Player {
 		
 		long startTime = System.nanoTime();
 		stopTime = startTime + timeLimit;
-		
-		//Move bestMoves[] = new Move[validMoves.size()];
 		
 		while(best != Integer.MAX_VALUE) {
 			best = Integer.MIN_VALUE;
@@ -89,6 +86,7 @@ public class AggressiveAI implements Player {
 					if(score > best) {
 						alpha = best = score;
 						bestMove = m;
+						i = 1;
 					} else if(score == best && rand.nextInt(++i)==0) { //uniform randomness
 						bestMove = m;
 					}
@@ -104,6 +102,7 @@ public class AggressiveAI implements Player {
 			
 			depth++;
 		}
+
 		System.out.println("Reached depth "+(depth-1)+" in "+(System.nanoTime() - startTime)/1000000000.0+"s");
 		return bestMove;
 	}
@@ -121,7 +120,7 @@ public class AggressiveAI implements Player {
 		b.applyMove(m);
 		ArrayList<Move> branches = b.getValidMovesSingleThread(-team);
 				
-		int value;
+		int value = 0;
 		if(team == playerTeam) { //Maximizing
 			value = Integer.MIN_VALUE;
 			if(branches.size() == 0) {
@@ -134,7 +133,7 @@ public class AggressiveAI implements Player {
 					if(score > value) {
 						alpha = value = score;
 					}
-					if(beta < value) {
+					if(value > beta) {
 						break;
 					}
 				} catch (TimeoutException te) {
@@ -169,8 +168,8 @@ public class AggressiveAI implements Player {
 	
 	//heuristic
 	public int evaluate(Move m, Board b) {
-		int score;
 		LinkedHashMap<Integer, Piece> myPieces, opponentPieces;
+		int myPieceCount, opponentPieceCount;
 		if(playerTeam == Piece.RED) {
 			myPieces = b.getRedPieces();
 			opponentPieces = b.getBlackPieces();
@@ -178,22 +177,30 @@ public class AggressiveAI implements Player {
 			opponentPieces = b.getRedPieces();
 			myPieces = b.getBlackPieces();
 		}
-		score = (myPieces.size()-opponentPieces.size())*2097152;
-		score += (b.getKingCount(playerTeam) - b.getKingCount(-playerTeam))*2048;
-		score += m.getCaptures().size()*m.getPiece().getTeam()*playerTeam;
+		myPieceCount = myPieces.size();
+		opponentPieceCount = opponentPieces.size();
+		
+		int score = (3*(myPieceCount-opponentPieceCount)+2*(b.getKingCount(playerTeam)-b.getKingCount(-playerTeam)))*2097152; //base value
 		for(Piece p : myPieces.values()) {
-			score += 64*aggressiveWeights[p.getY()*8+p.getX()];
-			if(p.isKing()) {
-				score += 16*aggressiveWeights[p.getY()*8+p.getX()];
-			}
-			if(opponentPieces.size() < myPieces.size() - 2) {
-				for(Piece o : opponentPieces.values()) {
-					score += (Math.abs(p.getX()-o.getX())+Math.abs(p.getY()-o.getY()));
-				}
-			} else if(p.getX()%7 == 0 || p.getY()%7 == 0) {
-				score += 512;
+			if(!p.isKing()) {
+				score += 16384*(playerTeam*(p.getY()-myHome)); //distance of my pawns to opposite side
+			} else {
+				score += kingWeights[p.getY()*8+p.getX()];
 			}
 		}
+		for(Piece p : opponentPieces.values()) {
+			if(!p.isKing()) {
+				score -= 16384*(playerTeam*(p.getY()-opponentHome)); //distance of opponent's pawns to my side
+			} else {
+				score -= kingWeights[p.getY()*8+p.getX()];
+			}
+		}
+		if(myPieceCount > opponentPieceCount) {
+			score += 2048*24/(myPieceCount+opponentPieceCount);
+		} else if(myPieceCount < opponentPieceCount) {
+			score -= 2048*24/(myPieceCount+opponentPieceCount);
+		}
+		
 		return score;
 	}
 	

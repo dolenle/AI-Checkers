@@ -71,7 +71,7 @@ public class HumanPlayer implements Player {
 		Random rand = new Random();
 		int x = sel;
 		if(sel == -1) {
-			x = rand.nextInt(6);
+			x = rand.nextInt(7);
 		}
 		String aiName=null, thinkText=null, resultText=null, prologue=null;
 		Player ai = null;
@@ -99,7 +99,7 @@ public class HumanPlayer implements Player {
 			break;
 		case 3:
 			aiName = "MultiThreadAI";
-			thinkText = "I'll have my team of highly trained monkeys work on your question ASAP.";
+			thinkText = "I'll have my team of highly trained monkeys examine your moves.";
 			resultText = "My team of monkeys has reached a conclusion. You should play";
 			prologue = ". Good luck.";
 			ai = new MultiThreadAI(team, 5);
@@ -117,6 +117,13 @@ public class HumanPlayer implements Player {
 			resultText = "I'm standin' here. You make the move. It's your move:";
 			prologue = ". Yeah? You like that? Huh?";
 			ai = new AggressiveAI(team, 5);
+			break;
+		case 6:
+			aiName = "SableAI";
+			thinkText = "Hi.";
+			resultText = "Weeeellll, if I were playing, I would choose";
+			prologue = ". Thanks!";
+			ai = new SableAI(team, 5);
 			break;
 		default:
 			System.out.println("Invalid option");

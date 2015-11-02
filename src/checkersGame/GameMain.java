@@ -56,11 +56,6 @@ public class GameMain {
 			}
 		} while(true);		
 		
-//		b = new Board(3);
-//		b.defaultStart();
-//		blackPlayer = new AbiAI(Piece.BLACK);
-//		redPlayer = new AlphabetAI(Piece.RED);
-		
 		ArrayList<Move> blackMoves, redMoves;
 		
 		b.printBoard();
@@ -182,6 +177,7 @@ public class GameMain {
 		System.out.println("5. AlphabetAI: Adds Alpha-Beta pruning and weighted kings to OkayAI.");
 		System.out.println("6. MultiThreadAI: Makes a great CPU warmer, and not much else.");
 		System.out.println("7. AggressiveAI: Pushes for the center and opposite side.");
+		System.out.println("8. SableAI: Uses something similar to Sable's heuristic.");
 		int input = -1;
 		do {
 			System.out.print("Enter a choice: ");
@@ -202,6 +198,8 @@ public class GameMain {
 					return new MultiThreadAI(team);
 				case 7:
 					return new AggressiveAI(team);
+				case 8:
+					return new SableAI(team);
 				}
 			} else {
 				scan.next();
@@ -226,6 +224,8 @@ public class GameMain {
 			return new MultiThreadAI(team, time);
 		case 7:
 			return new AggressiveAI(team, time);
+		case 8:
+			return new SableAI(team, time);
 		}
 		return null;
 	}
