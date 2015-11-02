@@ -66,7 +66,7 @@ public class AIWorker implements Callable<Integer> {
 				if(score < value) {
 					value = score;
 				}
-				if(value < score) {
+				if(value < beta) {
 					beta = value;
 				}
 				if(beta <= alpha) {
