@@ -426,4 +426,29 @@ public class Board {
 		}
 		return status;
 	}
+	
+	public int[] boardToArray() {
+		int[] result = new int[64];
+		for(int i = 0; i<64; i++) {
+			Piece p = pieceLocs[i];
+			if(p == null) {
+				result[i] = 0;
+			} else if(p.getTeam() == Piece.RED) {
+				if(p.isKing()) {
+					result[i] = 3;
+				} else {
+					result[i] = 1;
+				}
+			} else if(p.getTeam() == Piece.BLACK) {
+				if(p.isKing()) {
+					result[i] = 4;
+				} else {
+					result[i] = 2;
+				}
+			} else {
+				System.out.println("BAD");
+			}
+		}
+		return null;
+	}
 }

@@ -10,6 +10,7 @@ import checkersGame.Board;
 import checkersGame.Move;
 import checkersGame.Piece;
 import checkersGame.Player;
+import checkersGame.Step;
 
 public class SableAI implements Player {
 	private long timeLimit;
@@ -59,6 +60,20 @@ public class SableAI implements Player {
 	}
 	
 	public Move selectMove(ArrayList<Move> validMoves, Board b) {
+		System.out.println("AI has "+validMoves.size()+" moves:");
+		int counter = 1;
+		
+		for(Move m : validMoves) {
+			System.out.print(counter++ +". Piece at ("+m.getPiece().getX()+","+m.getPiece().getY()+")");
+			for(Step s : m.getSteps()) {
+				System.out.print("->("+s.getX()+","+s.getY()+")");
+			}
+			if(m.isPromotion()) {
+				System.out.println('*');
+			} else {
+				System.out.println();
+			}
+		}
 		int depth = 4;
 		Move bestMove = validMoves.get(0);
 		Move lastBest = bestMove;
@@ -69,8 +84,10 @@ public class SableAI implements Player {
 		
 		long startTime = System.nanoTime();
 		stopTime = startTime + timeLimit;
+		System.out.println("depth"+depth);
 		
-		while(best != Integer.MAX_VALUE) {
+		while(true) {
+			int move = 1;
 			best = Integer.MIN_VALUE;
 			lastBest = bestMove;
 			long lastTime = System.nanoTime();
@@ -82,16 +99,19 @@ public class SableAI implements Player {
 			for(Move m : validMoves) {
 				try {
 					int score = search(depth, m, b, playerTeam, alpha, beta);
+					System.out.println("move"+(move++)+":"+score);
 					if(score > best) {
-						alpha = best = score;
+//						alpha = best = score;
+						best = score;
 						bestMove = m;
 						i = 1;
 					} else if(score == best && rand.nextInt(++i)==0) { //uniform randomness
 						bestMove = m;
 					}
-					if(beta < best) {
-						break;
-					}
+//					if(beta < best) {
+//						System.out.println("pruned!");
+//						break;
+//					}
 				}  catch (TimeoutException te) {
 					System.out.println("Search time limit reached. Reverting to depth "+--depth);
 					System.out.println("Reached depth "+depth+" in "+(lastTime - startTime)/1000000000.0+"s");
@@ -102,8 +122,8 @@ public class SableAI implements Player {
 			depth++;
 		}
 
-		System.out.println("Reached depth "+(depth-1)+" in "+(System.nanoTime() - startTime)/1000000000.0+"s");
-		return bestMove;
+//		System.out.println("Reached depth "+(depth-1)+" in "+(System.nanoTime() - startTime)/1000000000.0+"s");
+//		return bestMove;
 	}
 	
 	private int search(int depth, Move m, Board b, int team, int alpha, int beta) throws TimeoutException {
@@ -132,12 +152,12 @@ public class SableAI implements Player {
 					if(score > value) {
 						value = score;
 					}
-					if(value > alpha) {
-						alpha = value;
-					}
-					if(beta <= alpha) {
-						break;
-					}
+//					if(value > alpha) {
+//						alpha = value;
+//					}
+//					if(beta <= alpha) {
+//						break;
+//					}
 				} catch (TimeoutException te) {
 					b.undoMove(m);
 					throw te;
@@ -155,12 +175,12 @@ public class SableAI implements Player {
 					if(score < value) {
 						value = score;
 					}
-					if(value < beta) {
-						beta = value;
-					}
-					if(beta <= alpha) {
-						break;
-					}
+//					if(value < beta) {
+//						beta = value;
+//					}
+//					if(beta <= alpha) {
+//						break;
+//					}
 				} catch (TimeoutException te) {
 					b.undoMove(m);
 					throw te;
@@ -175,7 +195,7 @@ public class SableAI implements Player {
 	public int evaluate(Move m, Board b) {
 		LinkedHashMap<Integer, Piece> myPieces, opponentPieces;
 		int myPieceCount, opponentPieceCount;
-//		int myAvgX=0, myAvgY=0, opAvgX=0, opAvgY=0;
+		int myAvgX=0, myAvgY=0, opAvgX=0, opAvgY=0;
 		if(playerTeam == Piece.RED) {
 			myPieces = b.getRedPieces();
 			opponentPieces = b.getBlackPieces();
@@ -198,8 +218,8 @@ public class SableAI implements Player {
 			} else {
 				score += kingWeights[p.getY()*8+p.getX()];
 			}
-//			myAvgX+=p.getX();
-//			myAvgY+=p.getY();
+			myAvgX+=p.getX();
+			myAvgY+=p.getY();
 		}
 		for(Piece p : opponentPieces.values()) {
 			if(!p.isKing()) {
@@ -207,20 +227,20 @@ public class SableAI implements Player {
 			} else {
 				score -= kingWeights[p.getY()*8+p.getX()];
 			}
-//			opAvgX+=p.getX();
-//			opAvgY+=p.getY();
+			opAvgX+=p.getX();
+			opAvgY+=p.getY();
 		}
 		if(myPieceCount > opponentPieceCount) {
 			score += 4096*24/(myPieceCount+opponentPieceCount);
 		} else if(myPieceCount < opponentPieceCount) {
 			score -= 4096*24/(myPieceCount+opponentPieceCount);
 		}
-//		myAvgX /= myPieceCount;
-//		myAvgY /= myPieceCount;
-//		opAvgX /= opponentPieceCount;
-//		opAvgY /= opponentPieceCount;
+		myAvgX /= myPieceCount;
+		myAvgY /= myPieceCount;
+		opAvgX /= opponentPieceCount;
+		opAvgY /= opponentPieceCount;
 		
-//		score += 1024*((7-Math.abs(myAvgX-opAvgX))+(7-Math.abs(myAvgY-opAvgY)))*playerTeam*m.getTeam(); //prefer pieces closer
+		score += 1024*((7-Math.abs(myAvgX-opAvgX))+(7-Math.abs(myAvgY-opAvgY)))*playerTeam*m.getTeam(); //prefer pieces closer
 		
 		return score;
 	}
